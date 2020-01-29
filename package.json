@@ -1,0 +1,41 @@
+{
+  "name": "otic",
+  "version": "0.0.1",
+  "description": "TODO",
+  "main": "index.js",
+  "scripts": {
+    "tsconfig": "tsc --init --declaration --allowSyntheticDefaultImports --target esnext --outDir lib",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "npm run type-check -- --watch",
+    "build": "npm run build:types && npm run build:js",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:js": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "bundle": "rollup -c",
+    "bundle:watch": "rollup -c --watch",
+    "test": "node test/server.js"
+  },
+  "repository": {},
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "module": "otic.js",
+  "typings": "lib/index.ts",
+  "devDependencies": {
+    "@babel/cli": "^7.8.3",
+    "@babel/core": "^7.8.3",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-proposal-numeric-separator": "^7.8.3",
+    "@babel/plugin-proposal-object-rest-spread": "^7.8.3",
+    "@babel/preset-env": "^7.8.3",
+    "@babel/preset-typescript": "^7.8.3",
+    "musk-ox": "^5.0.0",
+    "rollup": "^1.30.1",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "typescript": "^3.7.5"
+  },
+  "dependencies": {
+    "hypergiant": "^3.0.4"
+  }
+}
