@@ -3,6 +3,7 @@
 import AudioClipOptions from './AudioClipOptions';
 
 import Marker from '../interfaces/Marker';
+import { AudioClipState } from './AudioClipState'
 
 /**
  * An audio clip represents a piece of audio, which is either an audio html element or an audio boffer, as
@@ -46,6 +47,15 @@ export default class AudioClip {
   private _options: AudioClipOptions;
 
   /**
+   * The current state of this clip.
+   * 
+   * @private
+   * 
+   * @property {AudioClipState}
+   */
+  private _state: AudioClipState = AudioClipState.Stopped;
+
+  /**
    * @param {string} name The name of the audio clip.
    * @param {AudioBuffer} audio The AudioBuffer that contains the audio of the clip.
    * @param {AudioClipOptions} [options] The options passed to this audio clip.
@@ -64,13 +74,6 @@ export default class AudioClip {
    * @returns {string}
    */
   get name(): string { return this._name; }
-
-  /**
-   * Gets the audio buffer source of the clip.
-   * 
-   * @returns {AudioBufferSource}
-   */
-  get source(): any { return this._source; }
 
   /**
    * Plays this audio clip.
@@ -92,9 +95,16 @@ export default class AudioClip {
 
       this._source.start(0, clipMarker.start / 1000, clipMarker.duration / 1000);
 
-     return; 
+      return;
     }
 
     this._source.start();
+  }
+
+  /**
+   * Pause the currently playing audio.
+   */
+  pause() {
+
   }
 }

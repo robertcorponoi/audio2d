@@ -36,9 +36,22 @@ function _defineProperty(obj, key, value) {
 }
 
 /**
+ * Describes the different states available for an audio clip.
+ */
+
+var AudioClipState;
+
+(function (AudioClipState) {
+  AudioClipState["Stopped"] = "STOPPED";
+  AudioClipState["Playing"] = "PLAYING";
+  AudioClipState["Paused"] = "PAUSED";
+})(AudioClipState || (AudioClipState = {}));
+
+/**
  * An audio clip represents a piece of audio, which is either an audio html element or an audio boffer, as
  * a playable clip with extra properties.
  */
+
 var AudioClip =
 /*#__PURE__*/
 function () {
@@ -75,6 +88,14 @@ function () {
    */
 
   /**
+   * The current state of this clip.
+   * 
+   * @private
+   * 
+   * @property {AudioClipState}
+   */
+
+  /**
    * @param {string} name The name of the audio clip.
    * @param {AudioBuffer} audio The AudioBuffer that contains the audio of the clip.
    * @param {AudioClipOptions} [options] The options passed to this audio clip.
@@ -89,6 +110,8 @@ function () {
     _defineProperty(this, "_source", void 0);
 
     _defineProperty(this, "_options", void 0);
+
+    _defineProperty(this, "_state", AudioClipState.Stopped);
 
     this._name = name;
     this._audio = audio;
@@ -131,21 +154,17 @@ function () {
 
       this._source.start();
     }
+    /**
+     * Pause the currently playing audio.
+     */
+
+  }, {
+    key: "pause",
+    value: function pause() {}
   }, {
     key: "name",
     get: function get() {
       return this._name;
-    }
-    /**
-     * Gets the audio buffer source of the clip.
-     * 
-     * @returns {AudioBufferSource}
-     */
-
-  }, {
-    key: "source",
-    get: function get() {
-      return this._source;
     }
   }]);
 
@@ -165,7 +184,7 @@ function () {
 
     _defineProperty(this, "_gain", this._ctx.createGain().connect(this._ctx.destination));
 
-    _defineProperty(this, "_clips", {});
+    _defineProperty(this, "_clips", []);
   }
 
   _createClass(Otic, [{
@@ -177,13 +196,102 @@ function () {
      * @param {string} name The name of this audio clip used to reference it.
      * @param {AudioBuffer} buffer A reference to the audio buffer for this audio.
      * @param {Array<Marker>} [markers] A breakdown of the audio into individual parts that can be used independently.
+     * 
+     * @example
+     * 
+     * // Adding an audio clip with no markers.
+     * const levelUp = otic.addAudio('level-up', levelUpBuffer);
+     * 
+     * // Adding an audio clip with markers.
+     * const sfxMarkers = [
+     *   { name: 'walk', start: 1500, duration: 1000 },
+     *   { name: 'fall': start: 2500, duration: 1500 },
+     *   { name: 'collect-coin': start: 4000, duration: 750 }
+     * ];
+     * 
+     * const sfx = otic.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
      */
     value: function addAudio(name, audio) {
       var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       options.gain = this._gain;
       var clip = new AudioClip(name, audio, options);
-      this._clips[clip.name] = clip;
+
+      this._clips.push(clip);
+
       return clip;
+    }
+    /**
+     * Gets an audio clip from the media library.
+     * 
+     * @param {string} name The name of the audio clip to get.
+     * 
+     * @returns {AudioClip|undefined} Returns the audio clip if its found or undefined otherwise.
+     * 
+     * @example
+     * 
+     * otic.addAudio('track1', buffer);
+     * 
+     * const clip = otic.getAudio('track1');
+     */
+
+  }, {
+    key: "getAudio",
+    value: function getAudio(name) {
+      return this._clips.find(function (clip) {
+        return clip.name === name;
+      });
+    }
+    /**
+     * Removes an audio clip from the media library.
+     * 
+     * @param {string} name The name of the audio clip to remove.
+     * 
+     * @returns {Otic} Returns this for chaining.
+     * 
+     * @example
+     * 
+     * otic.addAudio('track1', buffer);
+     * 
+     * otic.removeAudio('track1');
+     */
+
+  }, {
+    key: "removeAudio",
+    value: function removeAudio(name) {
+      this._clips = this.clips.filter(function (clip) {
+        return clip.name !== name;
+      });
+      return this;
+    }
+    /**
+     * Removes all audio clips from the media library.
+     * 
+     * @returns {Otic} Returns this for chaining.
+     * 
+     * @example
+     * 
+     * otic.addAudio('track1', buffer1);
+     * otic.addAudio('track2', buffer2);
+     * 
+     * otic.removeAllAudio();
+     */
+
+  }, {
+    key: "removeAllAudio",
+    value: function removeAllAudio() {
+      this._clips = [];
+      return this;
+    }
+  }, {
+    key: "clips",
+
+    /**
+     * Returns the created audio clips.
+     * 
+     * @returns {Array<AudioClip>}
+     */
+    get: function get() {
+      return this._clips;
     }
   }]);
 

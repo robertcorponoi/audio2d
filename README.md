@@ -23,7 +23,12 @@
 - [Installation](#installation)
 - [A Note About Preloading](#a-note-about-preloading)
 - [Base API](#base-api)
+  - [addAudio](#addAudio)
+  - [getAudio](#getAudio)
+  - [removeAudio](#removeAudio)
+  - [removeAllAudio](#removeAllAudio)
 - [AudioClip API](#audio-clip-api)
+  - [play](#play)
 
 ## **Installation**
 
@@ -80,7 +85,7 @@ muskox.start();
 
 All examples are assumed to be running using existing audio buffers.
 
-***addAudio**
+### **addAudio**
 
 Creates a web audio clip from an `AudioBuffer` and returns it so you can play it or perform other actions.
 
@@ -91,7 +96,7 @@ Creates a web audio clip from an `AudioBuffer` and returns it so you can play it
 | options         | Object        |                                                                                                                |         |
 | options.markers | Array<<span>Marker> | Markers that can define specific points during the audio track that can be played independently of each other. |         |
 
-**example:**
+**examples:**
 
 Creating a basic audio clip with no markers:
 
@@ -112,3 +117,95 @@ const sfx = otic.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
 ```
 
 In the [Audio API](#audio-api) you can see how to use the markers and play only parts of a track.
+
+### **getAudio**
+
+Gets an audio clip added to the media library with `addAudio`.
+
+| param           | type          | description                                                                                                    | default |
+|-----------------|---------------|----------------------------------------------------------------------------------------------------------------|---------|
+| name            | string        | The name of the audio clip to get.                                                                             |         |
+
+**example:**
+
+```js
+otic.addAudio('track1', buffer);
+
+const clip = otic.getAudio('track1');
+```
+
+### **removeAudio**
+
+Removes an audio clip from the media library.
+
+| param           | type          | description                                                                                                    | default |
+|-----------------|---------------|----------------------------------------------------------------------------------------------------------------|---------|
+| name            | string        | The name of the audio clip to remove.                                                                          |         |
+
+**example:**
+
+```js
+otic.addAudio('track1', buffer);
+
+otic.removeAudio('track1');
+```
+
+### **removeAllAudio**
+
+Removes all audio clips from the media library.
+
+**example:**
+
+```js
+otic.addAudio('track1', buffer1);
+otic.addAudio('track2', buffer2);
+
+otic.removeAllAudio();
+```
+
+## **Audio API**
+
+The following properties and methods are available to use on audio clips after they have been created with `addAudio`.
+
+### **name**
+
+Returns the name of the clip.
+
+```js
+const levelUp = otic.addAudio('level-up', levelUpBuffer);
+
+console.log(levelUp.name); // 'level-up'
+```
+
+### **play**
+
+Plays an audio clip fully or at one of the markers.
+
+| param  | type   | description                                                       | default |
+|--------|--------|-------------------------------------------------------------------|---------|
+| marker | string | The name of the marker to play instead of playing the whole clip. | ''      |
+
+**examples:**
+
+Creating an audio clip and playing it in its entirety:
+
+```js
+const levelUp = otic.addAudio('level-up', levelUpBuffer);
+
+levelUp.play();
+```
+
+Creating an audio clip and defining markers to play:
+
+```js
+const sfxMarkers = [
+  { name: 'walk', start: 1500, duration: 1000 },
+  { name: 'fall': start: 2500, duration: 1500 },
+  { name: 'collect-coin': start: 4000, duration: 750 }
+];
+
+const sfx = otic.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
+
+// play just the falling sound.
+sfx.play('fall');
+```
