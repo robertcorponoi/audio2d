@@ -42,9 +42,9 @@ function _defineProperty(obj, key, value) {
 var AudioClipState;
 
 (function (AudioClipState) {
-  AudioClipState["Stopped"] = "STOPPED";
-  AudioClipState["Playing"] = "PLAYING";
-  AudioClipState["Paused"] = "PAUSED";
+  AudioClipState["STOPPED"] = "STOPPED";
+  AudioClipState["PLAYING"] = "PLAYING";
+  AudioClipState["PAUSED"] = "PAUSED";
 })(AudioClipState || (AudioClipState = {}));
 
 /**
@@ -76,7 +76,7 @@ function () {
    * 
    * @private
    * 
-   * @property {AudioBufferSourceNode|MediaElementAudioSourceNode}
+   * @property {AudioBufferSourceNode}
    */
 
   /**
@@ -96,6 +96,56 @@ function () {
    */
 
   /**
+   * The number of times this clip has been played.
+   * 
+   * @private
+   * 
+   * @property 
+   */
+
+  /**
+   * The time that this clip start being played at.
+   * 
+   * @private
+   * 
+   * @property {number}
+   */
+
+  /**
+   * When the clip is paused, this will keep track of when it was paused so it can be resumed at that time.
+   * 
+   * @private
+   * 
+   * @property {number}
+   */
+
+  /**
+   * The current time of the clip.
+   * 
+   * @private
+   * 
+   * @property {number}
+   */
+
+  /**
+   * The duration of the clip.
+   * 
+   * @private
+   * 
+   * @property {number}
+   */
+
+  /**
+   * The volume of this audio clip.
+   * 
+   * @private
+   * 
+   * @property {number}
+   * 
+   * @default 100
+   */
+
+  /**
    * @param {string} name The name of the audio clip.
    * @param {AudioBuffer} audio The AudioBuffer that contains the audio of the clip.
    * @param {AudioClipOptions} [options] The options passed to this audio clip.
@@ -111,10 +161,23 @@ function () {
 
     _defineProperty(this, "_options", void 0);
 
-    _defineProperty(this, "_state", AudioClipState.Stopped);
+    _defineProperty(this, "_state", AudioClipState.STOPPED);
+
+    _defineProperty(this, "_timesPlayed", 0);
+
+    _defineProperty(this, "_timeStartedAt", 0);
+
+    _defineProperty(this, "_timePausedAt", 0);
+
+    _defineProperty(this, "_currentTime", 0);
+
+    _defineProperty(this, "_duration", void 0);
+
+    _defineProperty(this, "_volume", 100);
 
     this._name = name;
     this._audio = audio;
+    this._duration = audio.duration;
     this._options = options;
   }
   /**
@@ -133,26 +196,37 @@ function () {
      * @param {string} marker The name of the marker of the part of the clip to play.
      */
     value: function play(marker) {
+      var _this = this;
+
+      var offset = this._timePausedAt;
+      this._options.gain.value = this._volume / 1000;
       this._source = this._options.gain.context.createBufferSource();
       this._source.buffer = this._audio;
 
       this._source.connect(this._options.gain);
 
+      this._source.onended = function () {
+        _this._state = AudioClipState.STOPPED;
+        _this._source.onended = null;
+      };
+
       if (marker) {
         var _this$_options$marker;
 
-        var ctx = this._options.gain.context;
         var clipMarker = (_this$_options$marker = this._options.markers) === null || _this$_options$marker === void 0 ? void 0 : _this$_options$marker.find(function (m) {
           return m.name === marker;
         });
         if (!clipMarker) return;
 
         this._source.start(0, clipMarker.start / 1000, clipMarker.duration / 1000);
-
-        return;
+      } else {
+        this._source.start();
       }
 
-      this._source.start();
+      this._timeStartedAt = this._options.gain.context.currentTime - offset;
+      this._timePausedAt = 0;
+      this._state = AudioClipState.PLAYING;
+      this._timesPlayed++;
     }
     /**
      * Pause the currently playing audio.
@@ -160,11 +234,105 @@ function () {
 
   }, {
     key: "pause",
-    value: function pause() {}
+    value: function pause() {
+      var elapsed = this._options.gain.context.currentTime - this._timeStartedAt;
+      this.stop();
+      this._timePausedAt = elapsed;
+      this._state = AudioClipState.PAUSED;
+    }
+    /**
+     * Stops the playback of this audio.
+     * 
+     * @returns {AudioClip} Returns this for chaining.
+     */
+
+  }, {
+    key: "stop",
+    value: function stop() {
+      this._source.disconnect();
+
+      this._source = this._options.gain.context.createBufferSource();
+      this._timePausedAt = 0;
+      this._timeStartedAt = 0;
+      this._state = AudioClipState.STOPPED;
+    }
+    /**
+     * Mutes this clip.
+     * 
+     * @param 
+     */
+
   }, {
     key: "name",
     get: function get() {
       return this._name;
+    }
+    /**
+     * Gets the current state of the audio clip.
+     * 
+     * @returns {string}
+     */
+
+  }, {
+    key: "state",
+    get: function get() {
+      return this._state;
+    }
+    /**
+     * Gets the number of times that this clip has been played.
+     * 
+     * @returns {number}
+     */
+
+  }, {
+    key: "timesPlayed",
+    get: function get() {
+      return this._timesPlayed;
+    }
+    /**
+     * Gets the current time of the clip.
+     * 
+     * @returns {number}
+     */
+
+  }, {
+    key: "currentTime",
+    get: function get() {
+      if (this._state === AudioClipState.PAUSED) return this._timePausedAt;
+      if (this._state === AudioClipState.PLAYING) return this._options.gain.context.currentTime - this._timeStartedAt;
+      return 0;
+    }
+    /**
+     * Gets the duration of the clip.
+     * 
+     * @returns {number}
+     */
+
+  }, {
+    key: "duration",
+    get: function get() {
+      return this._duration;
+    }
+    /**
+     * Gets the volume of this clip.
+     * 
+     * @returns {number}
+     */
+
+  }, {
+    key: "volume",
+    get: function get() {
+      return this._volume;
+    }
+    /**
+     * Sets the volume of this clip.
+     * 
+     * @param {number} vol The new volume of the clip.
+     */
+    ,
+    set: function set(vol) {
+      this._volume = vol;
+      this._options.gain.value = this._volume / 1000;
     }
   }]);
 
@@ -206,9 +374,7 @@ function () {
      * const sfxMarkers = [
      *   { name: 'walk', start: 1500, duration: 1000 },
      *   { name: 'fall': start: 2500, duration: 1500 },
-     *   { name: 'collect-coin': start: 4000, duration: 750 }
      * ];
-     * 
      * const sfx = otic.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
      */
     value: function addAudio(name, audio) {

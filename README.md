@@ -23,12 +23,10 @@
 - [Installation](#installation)
 - [A Note About Preloading](#a-note-about-preloading)
 - [Base API](#base-api)
-  - [addAudio](#addAudio)
-  - [getAudio](#getAudio)
-  - [removeAudio](#removeAudio)
-  - [removeAllAudio](#removeAllAudio)
+  - [Methods](#base-api-methods)
 - [AudioClip API](#audio-clip-api)
-  - [play](#play)
+  - [Properties](#audio-clip-properties)
+  - [Methods](#audio-clip-methods)
 
 ## **Installation**
 
@@ -163,19 +161,45 @@ otic.addAudio('track2', buffer2);
 otic.removeAllAudio();
 ```
 
-## **Audio API**
+## **Audio Clip**
 
 The following properties and methods are available to use on audio clips after they have been created with `addAudio`.
+
+## **Audio Clip Properties**
 
 ### **name**
 
 Returns the name of the clip.
 
-```js
-const levelUp = otic.addAudio('level-up', levelUpBuffer);
+### **state**
 
-console.log(levelUp.name); // 'level-up'
-```
+Returns the current state of the clip. These states are either 'STOPPED', 'PLAYING', or 'PAUSED'.
+
+### **timesPlayed**
+
+Returns the number of times that this clip has been played.
+
+### **currentTime**
+
+Returns the current time of the clip.
+
+### **duration**
+
+Returns the duration of the audio clip.
+
+### **volume**
+
+Returns the current volume of this clip. This overrides the global volume if one was set.
+
+### **volume**
+
+Sets the volume for the clip to use from here on out. The volume provided can be any number from 0-100. This overrides any global volume set.
+
+| param  | type   | description                                                       | default |
+|--------|--------|-------------------------------------------------------------------|---------|
+| vol    | number | The new volume for this clip                                      |         |
+
+## **Audio Clip Methods**
 
 ### **play**
 
@@ -209,3 +233,4 @@ const sfx = otic.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
 // play just the falling sound.
 sfx.play('fall');
 ```
+

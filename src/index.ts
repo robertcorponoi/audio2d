@@ -57,9 +57,7 @@ export default class Otic {
    * const sfxMarkers = [
    *   { name: 'walk', start: 1500, duration: 1000 },
    *   { name: 'fall': start: 2500, duration: 1500 },
-   *   { name: 'collect-coin': start: 4000, duration: 750 }
    * ];
-   * 
    * const sfx = otic.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
    */
   addAudio(name: string, audio: AudioBuffer, options: AudioClipOptions = {}): AudioClip {

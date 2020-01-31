@@ -1,6 +1,6 @@
 {
   "name": "otic",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "TODO",
   "main": "index.js",
   "scripts": {
@@ -21,12 +21,12 @@
   "module": "otic.js",
   "typings": "lib/index.ts",
   "devDependencies": {
-    "@babel/cli": "^7.8.3",
-    "@babel/core": "^7.8.3",
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.4",
     "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/plugin-proposal-numeric-separator": "^7.8.3",
     "@babel/plugin-proposal-object-rest-spread": "^7.8.3",
-    "@babel/preset-env": "^7.8.3",
+    "@babel/preset-env": "^7.8.4",
     "@babel/preset-typescript": "^7.8.3",
     "musk-ox": "^5.0.0",
     "rollup": "^1.30.1",

@@ -33,7 +33,7 @@ export default class AudioClip {
    * 
    * @private
    * 
-   * @property {AudioBufferSourceNode|MediaElementAudioSourceNode}
+   * @property {AudioBufferSourceNode}
    */
   private _source!: AudioBufferSourceNode;
 
@@ -53,7 +53,63 @@ export default class AudioClip {
    * 
    * @property {AudioClipState}
    */
-  private _state: AudioClipState = AudioClipState.Stopped;
+  private _state: AudioClipState = AudioClipState.STOPPED;
+
+  /**
+   * The number of times this clip has been played.
+   * 
+   * @private
+   * 
+   * @property 
+   */
+  private _timesPlayed: number = 0;
+
+  /**
+   * The time that this clip start being played at.
+   * 
+   * @private
+   * 
+   * @property {number}
+   */
+  private _timeStartedAt: number = 0;
+
+  /**
+   * When the clip is paused, this will keep track of when it was paused so it can be resumed at that time.
+   * 
+   * @private
+   * 
+   * @property {number}
+   */
+  private _timePausedAt: number = 0;
+
+  /**
+   * The current time of the clip.
+   * 
+   * @private
+   * 
+   * @property {number}
+   */
+  private _currentTime: number = 0;
+
+  /**
+   * The duration of the clip.
+   * 
+   * @private
+   * 
+   * @property {number}
+   */
+  private _duration: number;
+
+  /**
+   * The volume of this audio clip.
+   * 
+   * @private
+   * 
+   * @property {number}
+   * 
+   * @default 100
+   */
+  private _volume = 100;
 
   /**
    * @param {string} name The name of the audio clip.
@@ -64,6 +120,8 @@ export default class AudioClip {
     this._name = name;
 
     this._audio = audio;
+
+    this._duration = audio.duration;
 
     this._options = options;
   }
@@ -76,35 +134,129 @@ export default class AudioClip {
   get name(): string { return this._name; }
 
   /**
+   * Gets the current state of the audio clip.
+   * 
+   * @returns {string}
+   */
+  get state(): string { return this._state; }
+
+  /**
+   * Gets the number of times that this clip has been played.
+   * 
+   * @returns {number}
+   */
+  get timesPlayed(): number { return this._timesPlayed; }
+
+  /**
+   * Gets the current time of the clip.
+   * 
+   * @returns {number}
+   */
+  get currentTime(): number {
+    if (this._state === AudioClipState.PAUSED) return this._timePausedAt;
+
+    if (this._state === AudioClipState.PLAYING) return this._options.gain.context.currentTime - this._timeStartedAt;
+
+    return 0;
+  }
+
+  /**
+   * Gets the duration of the clip.
+   * 
+   * @returns {number}
+   */
+  get duration(): number { return this._duration; }
+
+  /**
+   * Gets the volume of this clip.
+   * 
+   * @returns {number}
+   */
+  get volume(): number { return this._volume; }
+
+  /**
+   * Sets the volume of this clip.
+   * 
+   * @param {number} vol The new volume of the clip.
+   */
+  set volume(vol: number) { 
+    this._volume = vol; 
+
+    this._options.gain.value = this._volume / 1000;
+  }
+
+  /**
    * Plays this audio clip.
    * 
    * @param {string} marker The name of the marker of the part of the clip to play.
    */
   play(marker?: string) {
+    const offset: number = this._timePausedAt;
+
+    this._options.gain.value = this._volume / 1000;
+
     this._source = this._options.gain.context.createBufferSource();
 
     this._source.buffer = this._audio;
 
     this._source.connect(this._options.gain);
 
+    this._source.onended = () => {
+      this._state = AudioClipState.STOPPED;
+
+      this._source.onended = null;
+    };
+
     if (marker) {
-      const ctx: AudioContext = this._options.gain.context;
       const clipMarker: (Marker | undefined) = this._options.markers?.find((m: Marker) => m.name === marker);
 
       if (!clipMarker) return;
 
       this._source.start(0, clipMarker.start / 1000, clipMarker.duration / 1000);
-
-      return;
+    } else {
+      this._source.start();
     }
 
-    this._source.start();
+    this._timeStartedAt = this._options.gain.context.currentTime - offset;
+
+    this._timePausedAt = 0;
+
+    this._state = AudioClipState.PLAYING;
+
+    this._timesPlayed++;
   }
 
   /**
    * Pause the currently playing audio.
    */
   pause() {
+    const elapsed: number = this._options.gain.context.currentTime - this._timeStartedAt;
 
+    this.stop();
+    
+    this._timePausedAt = elapsed;
+    
+    this._state = AudioClipState.PAUSED;
   }
+
+  /**
+   * Stops the playback of this audio.
+   * 
+   * @returns {AudioClip} Returns this for chaining.
+   */
+  stop() {
+    this._source.disconnect();
+    this._source = this._options.gain.context.createBufferSource();
+
+    this._timePausedAt = 0;
+    this._timeStartedAt = 0;
+    
+    this._state = AudioClipState.STOPPED;
+  }
+
+  /**
+   * Mutes this clip.
+   * 
+   * @param 
+   */
 }
