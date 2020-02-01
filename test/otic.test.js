@@ -18,6 +18,99 @@ afterEach(() => {
   muskOx = null;
 });
 
+describe('Getting and Setting Properties', () => {
+  it('should get the name of the clip', done => {
+    muskOx.onComplete.add(() => {
+      const sound = muskOx.fetch.audioBuffer('sound');
+
+      const track1 = otic.addAudio('track1', sound);
+
+      chai.expect(track1.name).to.equal('track1');
+
+      done();
+    });
+
+    muskOx.audioBuffer('sound', './assets/123.m4a');
+
+    muskOx.start();
+  });
+
+  it('should get the initial state of the clip', done => {
+    muskOx.onComplete.add(() => {
+      const sound = muskOx.fetch.audioBuffer('sound');
+
+      const track1 = otic.addAudio('track1', sound);
+
+      chai.expect(track1.state).to.equal('STOPPED');
+
+      done();
+    });
+
+    muskOx.audioBuffer('sound', './assets/123.m4a');
+
+    muskOx.start();
+  });
+
+  it('should get the number of times a clip was played', done => {
+    muskOx.onComplete.add(() => {
+      const sound = muskOx.fetch.audioBuffer('sound');
+
+      const track1 = otic.addAudio('track1', sound);
+
+      track1.play();
+      track1.mute();
+
+      setTimeout(() => {
+        track1.play();
+
+        chai.expect(track1.timesPlayed).to.equal(2);
+
+        done();
+      }, 3000);
+    })
+
+    muskOx.audioBuffer('sound', './assets/123.m4a');
+
+    muskOx.start();
+  }).timeout(50000);
+
+  it('should get the duration of the clip', done => {
+    muskOx.onComplete.add(() => {
+      const sound = muskOx.fetch.audioBuffer('sound');
+
+      const track1 = otic.addAudio('track1', sound);
+
+      chai.expect(track1.duration).to.equal(5.7585625);
+
+      done();
+    });
+
+    muskOx.audioBuffer('sound', './assets/123.m4a');
+
+    muskOx.start();
+  });
+
+  it('should change the playback volume', done => {
+    muskOx.onComplete.add(() => {
+      const sound = muskOx.fetch.audioBuffer('sound');
+
+      const track1 = otic.addAudio('track1', sound);
+
+      track1.volume = 50;
+
+      chai.expect(track1._options.gain.value).to.equal(0.5);
+
+      track1.mute();
+
+      done();
+    });
+
+    muskOx.audioBuffer('sound', './assets/123.m4a');
+
+    muskOx.start();
+  });
+});
+
 describe('Managing Audio Clips', () => {
   it('should add an audio clip to the collection of clips', done => {
     muskOx.onComplete.add(() => {
@@ -137,6 +230,32 @@ describe('Playing Audio Clips', () => {
 
     muskOx.start();
   });
+
+  // it('should play from a marker', done => {
+  //   muskOx.onComplete.add(() => {
+  //     const sound = muskOx.fetch.audioBuffer('sound');
+
+  //     const markers = [{ name: 'test', start: 1500, duration: 1500 }];
+
+  //     const track1 = otic.addAudio('track1', sound, { markers });
+
+  //     track1.play('test');
+
+  //     setTimeout(() => {
+  //       console.log(track1.currentTime);
+  //       chai.expect(track1.state).to.equal('STOPPED');
+
+  //       done();
+  //     }, 1000);
+
+  //     chai.expect(otic.clips.length).to.equal(1);
+
+  //   });
+
+  //   muskOx.audioBuffer('sound', './assets/123.m4a');
+
+  //   muskOx.start();
+  // });
 });
 
 describe('Pausing/Stopping Audio Clips', () => {
@@ -168,17 +287,126 @@ describe('Pausing/Stopping Audio Clips', () => {
 
       const track1 = otic.addAudio('track1', sound);
 
-      track1.play('test');
-      
+      track1.play();
+      track1.mute();
+
       setTimeout(() => {
         track1.pause();
-        
-        chai.expect(track1._timePausedAt).to.be.greaterThan(1);
 
-        chai.expect(track1._timePausedAt).to.be.lessThan(1.5);
+        chai.expect(track1._timePausedAt).to.be.greaterThan(0.9);
+
+        chai.expect(track1._timePausedAt).to.be.lessThan(1.1);
 
         done();
       }, 1000);
+    });
+
+    muskOx.audioBuffer('sound', './assets/123.m4a');
+
+    muskOx.start();
+  });
+
+  it('should set the state to PLAYING when the clip has been resumed from a paused state', (done) => {
+    muskOx.onComplete.add(() => {
+      const sound = muskOx.fetch.audioBuffer('sound');
+
+      const track1 = otic.addAudio('track1', sound);
+
+      track1.play();
+      track1.mute();
+
+      setTimeout(() => {
+        track1.pause();
+
+        setTimeout(() => {
+          track1.resume();
+
+          chai.expect(track1._state).to.equal('PLAYING');
+
+          done();
+        }, 500);
+      }, 2000);
+    });
+
+    muskOx.audioBuffer('sound', './assets/123.m4a');
+
+    muskOx.start();
+  }).timeout(3000);
+});
+
+describe('Muting and Unmuting Clips', () => {
+  it('should mute a clip', done => {
+    muskOx.onComplete.add(() => {
+      const sound = muskOx.fetch.audioBuffer('sound');
+
+      const track1 = otic.addAudio('track1', sound);
+
+      track1.play();
+
+      setTimeout(() => {
+        track1.mute();
+
+        chai.expect(track1._options.gain.value).to.equal(0);
+
+        done();
+      }, 500);
+    });
+
+    muskOx.audioBuffer('sound', './assets/123.m4a');
+
+    muskOx.start();
+  });
+
+  it('should unmute a clip after being muted', done => {
+    muskOx.onComplete.add(() => {
+      const sound = muskOx.fetch.audioBuffer('sound');
+
+      const track1 = otic.addAudio('track1', sound);
+
+      track1.play();
+
+      setTimeout(() => {
+        track1.mute();
+
+        setTimeout(() => {
+          track1.unmute();
+
+          chai.expect(track1._options.gain.value).to.equal(1);
+
+          track1.mute();
+
+          done();
+        }, 500);
+      }, 500);
+    });
+
+    muskOx.audioBuffer('sound', './assets/123.m4a');
+
+    muskOx.start();
+  });
+
+  it('should unmute a clip with the same volume level as before it was muted', done => {
+    muskOx.onComplete.add(() => {
+      const sound = muskOx.fetch.audioBuffer('sound');
+
+      const track1 = otic.addAudio('track1', sound);
+
+      track1.play();
+      track1.volume = 34;
+
+      setTimeout(() => {
+        track1.mute();
+
+        setTimeout(() => {
+          track1.unmute();
+
+          chai.expect(track1._options.gain.value).to.equal(0.34);
+
+          track1.mute();
+
+          done();
+        }, 500);
+      }, 500);
     });
 
     muskOx.audioBuffer('sound', './assets/123.m4a');

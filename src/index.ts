@@ -23,7 +23,7 @@ export default class Otic {
    * 
    * @property {GainNode}
    */
-  private _gain: AudioNode = this._ctx.createGain().connect(this._ctx.destination);
+  private _gain: AudioNode = this._ctx.createGain();
 
   /**
    * The object that contains all of the audio clips created.
@@ -33,6 +33,10 @@ export default class Otic {
    * @property {Array<AudioClip>}
    */
   private _clips: Array<AudioClip> = [];
+
+  constructor() {
+    this._gain.connect(this._ctx.destination);
+  }
 
   /**
    * Returns the created audio clips.
@@ -61,6 +65,7 @@ export default class Otic {
    * const sfx = otic.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
    */
   addAudio(name: string, audio: AudioBuffer, options: AudioClipOptions = {}): AudioClip {
+    options.ctx = this._ctx;
     options.gain = this._gain;
 
     const clip = new AudioClip(name, audio, options);

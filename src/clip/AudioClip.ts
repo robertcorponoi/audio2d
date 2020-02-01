@@ -112,6 +112,15 @@ export default class AudioClip {
   private _volume = 100;
 
   /**
+   * Keeps track of the previous volume of the clip.
+   * 
+   * @private
+   * 
+   * @property {number}
+   */
+  private _previousVolume: number = 1;
+
+  /**
    * @param {string} name The name of the audio clip.
    * @param {AudioBuffer} audio The AudioBuffer that contains the audio of the clip.
    * @param {AudioClipOptions} [options] The options passed to this audio clip.
@@ -124,6 +133,8 @@ export default class AudioClip {
     this._duration = audio.duration;
 
     this._options = options;
+
+    if (!this._options.markers) this._options.markers = [];
   }
 
   /**
@@ -155,7 +166,7 @@ export default class AudioClip {
   get currentTime(): number {
     if (this._state === AudioClipState.PAUSED) return this._timePausedAt;
 
-    if (this._state === AudioClipState.PLAYING) return this._options.gain.context.currentTime - this._timeStartedAt;
+    if (this._state === AudioClipState.PLAYING) return this._options.ctx.currentTime - this._timeStartedAt;
 
     return 0;
   }
@@ -182,7 +193,9 @@ export default class AudioClip {
   set volume(vol: number) { 
     this._volume = vol; 
 
-    this._options.gain.value = this._volume / 1000;
+    this._options.gain.value = this._volume / 100;
+
+    this._options.gain.gain.setValueAtTime(this._options.gain.value, this._options.ctx.currentTime);
   }
 
   /**
@@ -193,9 +206,9 @@ export default class AudioClip {
   play(marker?: string) {
     const offset: number = this._timePausedAt;
 
-    this._options.gain.value = this._volume / 1000;
+    this._options.gain.value = this._volume / 100;
 
-    this._source = this._options.gain.context.createBufferSource();
+    this._source = this._options.ctx.createBufferSource();
 
     this._source.buffer = this._audio;
 
@@ -212,12 +225,14 @@ export default class AudioClip {
 
       if (!clipMarker) return;
 
-      this._source.start(0, clipMarker.start / 1000, clipMarker.duration / 1000);
+      this._source.start(0, clipMarker.start / 1000, clipMarker.duration ? clipMarker.duration / 1000 : undefined);
+
+      if (clipMarker.name === 'otic-pause') this._options.markers = this._options.markers?.filter((marker: Marker) => marker.name !== 'otic-pause');
     } else {
       this._source.start();
     }
 
-    this._timeStartedAt = this._options.gain.context.currentTime - offset;
+    this._timeStartedAt = this._options.ctx.currentTime - offset;
 
     this._timePausedAt = 0;
 
@@ -230,13 +245,22 @@ export default class AudioClip {
    * Pause the currently playing audio.
    */
   pause() {
-    const elapsed: number = this._options.gain.context.currentTime - this._timeStartedAt;
+    const elapsed: number = this._options.ctx.currentTime - this._timeStartedAt;
 
     this.stop();
     
-    this._timePausedAt = elapsed;
+    this._timePausedAt = elapsed
+
+    this._options.markers?.push({ name: 'otic-pause', start: this._timePausedAt * 1000 });
     
     this._state = AudioClipState.PAUSED;
+  }
+
+  /**
+   * Resumes playing this clip from when it was paused.
+   */
+  resume() {
+    this.play('otic-pause');
   }
 
   /**
@@ -246,7 +270,7 @@ export default class AudioClip {
    */
   stop() {
     this._source.disconnect();
-    this._source = this._options.gain.context.createBufferSource();
+    this._source = this._options.ctx.createBufferSource();
 
     this._timePausedAt = 0;
     this._timeStartedAt = 0;
@@ -256,7 +280,17 @@ export default class AudioClip {
 
   /**
    * Mutes this clip.
-   * 
-   * @param 
    */
+  mute() {
+    this._previousVolume = this.volume;
+
+    this.volume = 0;
+  }
+
+  /**
+   * Puts the volume back to the value it was at before the clip was muted.
+   */
+  unmute() {
+    this.volume = this._previousVolume;
+  }
 }

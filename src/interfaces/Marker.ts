@@ -17,5 +17,5 @@ export default interface Marker {
   /**
    * The amount of time that this marker lasts, in milliseconds.
    */
-  duration: number;
+  duration?: number;
 }

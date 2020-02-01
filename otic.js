@@ -146,6 +146,14 @@ function () {
    */
 
   /**
+   * Keeps track of the previous volume of the clip.
+   * 
+   * @private
+   * 
+   * @property {number}
+   */
+
+  /**
    * @param {string} name The name of the audio clip.
    * @param {AudioBuffer} audio The AudioBuffer that contains the audio of the clip.
    * @param {AudioClipOptions} [options] The options passed to this audio clip.
@@ -175,10 +183,13 @@ function () {
 
     _defineProperty(this, "_volume", 100);
 
+    _defineProperty(this, "_previousVolume", 1);
+
     this._name = name;
     this._audio = audio;
     this._duration = audio.duration;
     this._options = options;
+    if (!this._options.markers) this._options.markers = [];
   }
   /**
    * Gets the name of the audio clip.
@@ -199,8 +210,8 @@ function () {
       var _this = this;
 
       var offset = this._timePausedAt;
-      this._options.gain.value = this._volume / 1000;
-      this._source = this._options.gain.context.createBufferSource();
+      this._options.gain.value = this._volume / 100;
+      this._source = this._options.ctx.createBufferSource();
       this._source.buffer = this._audio;
 
       this._source.connect(this._options.gain);
@@ -211,19 +222,23 @@ function () {
       };
 
       if (marker) {
-        var _this$_options$marker;
+        var _this$_options$marker, _this$_options$marker2;
 
         var clipMarker = (_this$_options$marker = this._options.markers) === null || _this$_options$marker === void 0 ? void 0 : _this$_options$marker.find(function (m) {
           return m.name === marker;
         });
         if (!clipMarker) return;
 
-        this._source.start(0, clipMarker.start / 1000, clipMarker.duration / 1000);
+        this._source.start(0, clipMarker.start / 1000, clipMarker.duration ? clipMarker.duration / 1000 : undefined);
+
+        if (clipMarker.name === 'otic-pause') this._options.markers = (_this$_options$marker2 = this._options.markers) === null || _this$_options$marker2 === void 0 ? void 0 : _this$_options$marker2.filter(function (marker) {
+          return marker.name !== 'otic-pause';
+        });
       } else {
         this._source.start();
       }
 
-      this._timeStartedAt = this._options.gain.context.currentTime - offset;
+      this._timeStartedAt = this._options.ctx.currentTime - offset;
       this._timePausedAt = 0;
       this._state = AudioClipState.PLAYING;
       this._timesPlayed++;
@@ -235,10 +250,25 @@ function () {
   }, {
     key: "pause",
     value: function pause() {
-      var elapsed = this._options.gain.context.currentTime - this._timeStartedAt;
+      var _this$_options$marker3;
+
+      var elapsed = this._options.ctx.currentTime - this._timeStartedAt;
       this.stop();
       this._timePausedAt = elapsed;
+      (_this$_options$marker3 = this._options.markers) === null || _this$_options$marker3 === void 0 ? void 0 : _this$_options$marker3.push({
+        name: 'otic-pause',
+        start: this._timePausedAt * 1000
+      });
       this._state = AudioClipState.PAUSED;
+    }
+    /**
+     * Resumes playing this clip from when it was paused.
+     */
+
+  }, {
+    key: "resume",
+    value: function resume() {
+      this.play('otic-pause');
     }
     /**
      * Stops the playback of this audio.
@@ -251,17 +281,30 @@ function () {
     value: function stop() {
       this._source.disconnect();
 
-      this._source = this._options.gain.context.createBufferSource();
+      this._source = this._options.ctx.createBufferSource();
       this._timePausedAt = 0;
       this._timeStartedAt = 0;
       this._state = AudioClipState.STOPPED;
     }
     /**
      * Mutes this clip.
-     * 
-     * @param 
      */
 
+  }, {
+    key: "mute",
+    value: function mute() {
+      this._previousVolume = this.volume;
+      this.volume = 0;
+    }
+    /**
+     * Puts the volume back to the value it was at before the clip was muted.
+     */
+
+  }, {
+    key: "unmute",
+    value: function unmute() {
+      this.volume = this._previousVolume;
+    }
   }, {
     key: "name",
     get: function get() {
@@ -299,7 +342,7 @@ function () {
     key: "currentTime",
     get: function get() {
       if (this._state === AudioClipState.PAUSED) return this._timePausedAt;
-      if (this._state === AudioClipState.PLAYING) return this._options.gain.context.currentTime - this._timeStartedAt;
+      if (this._state === AudioClipState.PLAYING) return this._options.ctx.currentTime - this._timeStartedAt;
       return 0;
     }
     /**
@@ -332,7 +375,9 @@ function () {
     ,
     set: function set(vol) {
       this._volume = vol;
-      this._options.gain.value = this._volume / 1000;
+      this._options.gain.value = this._volume / 100;
+
+      this._options.gain.gain.setValueAtTime(this._options.gain.value, this._options.ctx.currentTime);
     }
   }]);
 
@@ -345,15 +390,46 @@ function () {
 var Otic =
 /*#__PURE__*/
 function () {
+  /**
+   * A reference to the audio context.
+   * 
+   * @private
+   * 
+   * @property {AudioContext}
+   */
+
+  /**
+   * A reference to the gain node.
+   * 
+   * @private
+   * 
+   * @property {GainNode}
+   */
+
+  /**
+   * The object that contains all of the audio clips created.
+   * 
+   * @private
+   * 
+   * @property {Array<AudioClip>}
+   */
   function Otic() {
     _classCallCheck(this, Otic);
 
     _defineProperty(this, "_ctx", new AudioContext());
 
-    _defineProperty(this, "_gain", this._ctx.createGain().connect(this._ctx.destination));
+    _defineProperty(this, "_gain", this._ctx.createGain());
 
     _defineProperty(this, "_clips", []);
+
+    this._gain.connect(this._ctx.destination);
   }
+  /**
+   * Returns the created audio clips.
+   * 
+   * @returns {Array<AudioClip>}
+   */
+
 
   _createClass(Otic, [{
     key: "addAudio",
@@ -379,6 +455,7 @@ function () {
      */
     value: function addAudio(name, audio) {
       var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      options.ctx = this._ctx;
       options.gain = this._gain;
       var clip = new AudioClip(name, audio, options);
 
@@ -450,12 +527,6 @@ function () {
     }
   }, {
     key: "clips",
-
-    /**
-     * Returns the created audio clips.
-     * 
-     * @returns {Array<AudioClip>}
-     */
     get: function get() {
       return this._clips;
     }
