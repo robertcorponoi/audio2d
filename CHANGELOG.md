@@ -1,3 +1,7 @@
+0.0.5 / 2020-02-02
+==================
+* [DOCS] Expanded documentation for audio clip methods.
+
 0.0.4 / 2020-01-30
 ==================
 * [FEATURE] Made resume work more naturally within the application.

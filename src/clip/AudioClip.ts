@@ -47,6 +47,15 @@ export default class AudioClip {
   private _options: AudioClipOptions;
 
   /**
+   * A reference to the gain node for this clip.
+   * 
+   * @private
+   * 
+   * @property {GainNode}
+   */
+  private _gain: GainNode;
+
+  /**
    * The current state of this clip.
    * 
    * @private
@@ -134,6 +143,8 @@ export default class AudioClip {
 
     this._options = options;
 
+    this._gain = this._options.ctx.createGain();
+
     if (!this._options.markers) this._options.markers = [];
   }
 
@@ -193,9 +204,11 @@ export default class AudioClip {
   set volume(vol: number) { 
     this._volume = vol; 
 
-    this._options.gain.value = this._volume / 100;
+    this._gain.gain.value = this._volume / 100;
 
-    this._options.gain.gain.setValueAtTime(this._options.gain.value, this._options.ctx.currentTime);
+    console.log(vol);
+
+    this._gain.gain.setValueAtTime(this._gain.gain.value, this._options.ctx.currentTime);
   }
 
   /**
@@ -206,13 +219,13 @@ export default class AudioClip {
   play(marker?: string) {
     const offset: number = this._timePausedAt;
 
-    this._options.gain.value = this._volume / 100;
+    this._gain.gain.value = this._volume / 100;
 
     this._source = this._options.ctx.createBufferSource();
 
     this._source.buffer = this._audio;
 
-    this._source.connect(this._options.gain);
+    this._source.connect(this._gain);
 
     this._source.onended = () => {
       this._state = AudioClipState.STOPPED;

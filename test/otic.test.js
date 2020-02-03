@@ -98,7 +98,7 @@ describe('Getting and Setting Properties', () => {
 
       track1.volume = 50;
 
-      chai.expect(track1._options.gain.value).to.equal(0.5);
+      chai.expect(track1._gain.gain.value).to.equal(0.5);
 
       track1.mute();
 
@@ -346,7 +346,7 @@ describe('Muting and Unmuting Clips', () => {
       setTimeout(() => {
         track1.mute();
 
-        chai.expect(track1._options.gain.value).to.equal(0);
+        chai.expect(track1._gain.gain.value).to.equal(0);
 
         done();
       }, 500);
@@ -371,7 +371,7 @@ describe('Muting and Unmuting Clips', () => {
         setTimeout(() => {
           track1.unmute();
 
-          chai.expect(track1._options.gain.value).to.equal(1);
+          chai.expect(track1._gain.gain.value).to.equal(1);
 
           track1.mute();
 
@@ -400,7 +400,9 @@ describe('Muting and Unmuting Clips', () => {
         setTimeout(() => {
           track1.unmute();
 
-          chai.expect(track1._options.gain.value).to.equal(0.34);
+          chai.expect(track1._gain.gain.value).to.be.greaterThan(0.34);
+          
+          chai.expect(track1._gain.gain.value).to.be.lessThan(0.341);
 
           track1.mute();
 

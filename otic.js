@@ -88,6 +88,14 @@ function () {
    */
 
   /**
+   * A reference to the gain node for this clip.
+   * 
+   * @private
+   * 
+   * @property {GainNode}
+   */
+
+  /**
    * The current state of this clip.
    * 
    * @private
@@ -169,6 +177,8 @@ function () {
 
     _defineProperty(this, "_options", void 0);
 
+    _defineProperty(this, "_gain", void 0);
+
     _defineProperty(this, "_state", AudioClipState.STOPPED);
 
     _defineProperty(this, "_timesPlayed", 0);
@@ -189,6 +199,7 @@ function () {
     this._audio = audio;
     this._duration = audio.duration;
     this._options = options;
+    this._gain = this._options.ctx.createGain();
     if (!this._options.markers) this._options.markers = [];
   }
   /**
@@ -210,11 +221,11 @@ function () {
       var _this = this;
 
       var offset = this._timePausedAt;
-      this._options.gain.value = this._volume / 100;
+      this._gain.gain.value = this._volume / 100;
       this._source = this._options.ctx.createBufferSource();
       this._source.buffer = this._audio;
 
-      this._source.connect(this._options.gain);
+      this._source.connect(this._gain);
 
       this._source.onended = function () {
         _this._state = AudioClipState.STOPPED;
@@ -375,9 +386,10 @@ function () {
     ,
     set: function set(vol) {
       this._volume = vol;
-      this._options.gain.value = this._volume / 100;
+      this._gain.gain.value = this._volume / 100;
+      console.log(vol);
 
-      this._options.gain.gain.setValueAtTime(this._options.gain.value, this._options.ctx.currentTime);
+      this._gain.gain.setValueAtTime(this._gain.gain.value, this._options.ctx.currentTime);
     }
   }]);
 
@@ -456,7 +468,6 @@ function () {
     value: function addAudio(name, audio) {
       var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       options.ctx = this._ctx;
-      options.gain = this._gain;
       var clip = new AudioClip(name, audio, options);
 
       this._clips.push(clip);

@@ -234,3 +234,82 @@ const sfx = otic.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
 sfx.play('fall');
 ```
 
+### **pause**
+
+Pauses an audio clip.
+
+**example:**
+
+```js
+const sfx = otic.addAudio('sfx', sfxBuffer);
+
+sfx.play();
+
+setTimeout(() => {
+  sfx.pause();
+}, 1000);
+```
+
+### **resume**
+
+Resumes playing an audio clip from a paused state.
+
+***example:**
+
+```js
+const sfx = otic.addAudio('sfx', sfxBuffer);
+
+sfx.play();
+
+setTimeout(() => {
+  sfx.pause();
+
+  setTimeout(() => {
+    sfx.resume();
+  }, 1000);
+}, 1000);
+```
+
+### **stop**
+
+Completely stops the playback of an audio clip and resets it so next time it plays it will play from the beginning.
+
+**example:**
+
+```js
+const sfx = otic.addAudio('sfx', sfxBuffer);
+
+sfx.play();
+
+setTimeout(() => {
+  sfx.stop();
+}, 1000);
+```
+
+### **mute**
+
+Mutes an audio clip but saves the previous volume so when its unmuted it will go back to the volume it was before.
+
+**example:**
+
+```js
+const sfx = otic.addAudio('sfx', sfxBuffer);
+
+sfx.play();
+sfx.mute();
+```
+
+### **unmute**
+
+Unmutes an audio clip and sets the volume to what it was before it was muted.
+
+**example:**
+
+```js
+const sfx = otic.addAudio('sfx', sfxBuffer);
+
+sfx.play();
+
+sfx.mute();
+sfx.unmute();
+```

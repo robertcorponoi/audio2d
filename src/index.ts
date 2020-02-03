@@ -66,7 +66,6 @@ export default class Otic {
    */
   addAudio(name: string, audio: AudioBuffer, options: AudioClipOptions = {}): AudioClip {
     options.ctx = this._ctx;
-    options.gain = this._gain;
 
     const clip = new AudioClip(name, audio, options);
 
