@@ -385,11 +385,9 @@ function () {
      */
     ,
     set: function set(vol) {
-      this._volume = vol;
-      this._gain.gain.value = this._volume / 100;
-      console.log(vol);
+      this._volume = vol; // this._gain.gain.value = this._volume / 100;
 
-      this._gain.gain.setValueAtTime(this._gain.gain.value, this._options.ctx.currentTime);
+      this._gain.gain.setValueAtTime(this._volume / 100, this._options.ctx.currentTime);
     }
   }]);
 

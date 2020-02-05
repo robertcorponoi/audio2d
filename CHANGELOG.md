@@ -1,3 +1,7 @@
+0.0.6 / 2020-02-04
+==================
+* [TEST] Fixed a failing test after adding gain to each audio clip.
+
 0.0.5 / 2020-02-02
 ==================
 * [DOCS] Expanded documentation for audio clip methods.
