@@ -4,6 +4,8 @@ function _classCallCheck(instance, Constructor) {
   }
 }
 
+var classCallCheck = _classCallCheck;
+
 function _defineProperties(target, props) {
   for (var i = 0; i < props.length; i++) {
     var descriptor = props[i];
@@ -20,6 +22,8 @@ function _createClass(Constructor, protoProps, staticProps) {
   return Constructor;
 }
 
+var createClass = _createClass;
+
 function _defineProperty(obj, key, value) {
   if (key in obj) {
     Object.defineProperty(obj, key, {
@@ -34,6 +38,8 @@ function _defineProperty(obj, key, value) {
 
   return obj;
 }
+
+var defineProperty = _defineProperty;
 
 /**
  * Describes the different states available for an audio clip.
@@ -85,6 +91,14 @@ function () {
    * @private
    * 
    * @property {AudioClipOptions}
+   */
+
+  /**
+   * A reference to the biquad filter node for this clip.
+   * 
+   * @private
+   * 
+   * @property {BiquadFilterNode}
    */
 
   /**
@@ -162,44 +176,60 @@ function () {
    */
 
   /**
+   * Indicates whether this audio clip is played on a loop or not.
+   * 
+   * @property {boolean}
+   * 
+   * @default false
+   */
+
+  /**
    * @param {string} name The name of the audio clip.
    * @param {AudioBuffer} audio The AudioBuffer that contains the audio of the clip.
    * @param {AudioClipOptions} [options] The options passed to this audio clip.
    */
   function AudioClip(name, audio, options) {
-    _classCallCheck(this, AudioClip);
+    classCallCheck(this, AudioClip);
 
-    _defineProperty(this, "_name", void 0);
+    defineProperty(this, "_name", void 0);
 
-    _defineProperty(this, "_audio", void 0);
+    defineProperty(this, "_audio", void 0);
 
-    _defineProperty(this, "_source", void 0);
+    defineProperty(this, "_source", void 0);
 
-    _defineProperty(this, "_options", void 0);
+    defineProperty(this, "_options", void 0);
 
-    _defineProperty(this, "_gain", void 0);
+    defineProperty(this, "_filter", void 0);
 
-    _defineProperty(this, "_state", AudioClipState.STOPPED);
+    defineProperty(this, "_gain", void 0);
 
-    _defineProperty(this, "_timesPlayed", 0);
+    defineProperty(this, "_state", AudioClipState.STOPPED);
 
-    _defineProperty(this, "_timeStartedAt", 0);
+    defineProperty(this, "_timesPlayed", 0);
 
-    _defineProperty(this, "_timePausedAt", 0);
+    defineProperty(this, "_timeStartedAt", 0);
 
-    _defineProperty(this, "_currentTime", 0);
+    defineProperty(this, "_timePausedAt", 0);
 
-    _defineProperty(this, "_duration", void 0);
+    defineProperty(this, "_currentTime", 0);
 
-    _defineProperty(this, "_volume", 100);
+    defineProperty(this, "_duration", void 0);
 
-    _defineProperty(this, "_previousVolume", 1);
+    defineProperty(this, "_volume", 100);
 
+    defineProperty(this, "_previousVolume", 1);
+
+    defineProperty(this, "loop", false);
+
+    // test();
     this._name = name;
     this._audio = audio;
     this._duration = audio.duration;
     this._options = options;
-    this._gain = this._options.ctx.createGain();
+    this._gain = this._options.ctx.createGain(); //this._filter.connect(this._gain);
+
+    this._gain.connect(this._options.ctx.destination);
+
     if (!this._options.markers) this._options.markers = [];
   }
   /**
@@ -209,14 +239,25 @@ function () {
    */
 
 
-  _createClass(AudioClip, [{
-    key: "play",
+  createClass(AudioClip, [{
+    key: "addBiquadFilter",
 
+    /**
+     * Adds a biquad filter node to this clip.
+     */
+    value: function addBiquadFilter() {
+      this._filter = this._options.ctx.createBiquadFilter();
+
+      this._filter.connect(this._gain);
+    }
     /**
      * Plays this audio clip.
      * 
      * @param {string} marker The name of the marker of the part of the clip to play.
      */
+
+  }, {
+    key: "play",
     value: function play(marker) {
       var _this = this;
 
@@ -224,13 +265,14 @@ function () {
       this._gain.gain.value = this._volume / 100;
       this._source = this._options.ctx.createBufferSource();
       this._source.buffer = this._audio;
-
-      this._source.connect(this._gain);
+      if (this._filter) this._source.connect(this._filter);else this._source.connect(this._gain);
 
       this._source.onended = function () {
         _this._state = AudioClipState.STOPPED;
         _this._source.onended = null;
       };
+
+      this._source.loop = this.loop;
 
       if (marker) {
         var _this$_options$marker, _this$_options$marker2;
@@ -315,7 +357,24 @@ function () {
     key: "unmute",
     value: function unmute() {
       this.volume = this._previousVolume;
-    }
+    } // async bt() {
+    //   this._options.ctx.audioWorklet.addModule('https://raw.githubusercontent.com/GoogleChromeLabs/web-audio-samples/master/audio-worklet/basic/bit-crusher/bit-crusher-processor.js')
+    //   .then((blah: any) => {
+    //     console.log('hi');
+    //       console.log(blah);
+    //       const bitCrusher =
+    //         new AudioWorkletNode(this._options.ctx, 'bit-crusher-processor');
+    //       const paramBitDepth = bitCrusher.parameters.get('bitDepth');
+    //       const paramReduction = bitCrusher.parameters.get('frequencyReduction');
+    //       this._source = this._options.ctx.createBufferSource();
+    //       this._source.buffer = this._audio;
+    //       this._source.connect(bitCrusher).connect(this._options.ctx.destination);
+    //       paramReduction!.setValueAtTime(0.01, 0);
+    //       paramBitDepth!.setValueAtTime(1, 0);
+    //       this._source.start();
+    //     })
+    // }
+
   }, {
     key: "name",
     get: function get() {
@@ -400,69 +459,75 @@ function () {
 var Otic =
 /*#__PURE__*/
 function () {
-  /**
-   * A reference to the audio context.
-   * 
-   * @private
-   * 
-   * @property {AudioContext}
-   */
-
-  /**
-   * A reference to the gain node.
-   * 
-   * @private
-   * 
-   * @property {GainNode}
-   */
-
-  /**
-   * The object that contains all of the audio clips created.
-   * 
-   * @private
-   * 
-   * @property {Array<AudioClip>}
-   */
-  function Otic() {
-    _classCallCheck(this, Otic);
-
-    _defineProperty(this, "_ctx", new AudioContext());
-
-    _defineProperty(this, "_gain", this._ctx.createGain());
-
-    _defineProperty(this, "_clips", []);
-
-    this._gain.connect(this._ctx.destination);
-  }
-  /**
-   * Returns the created audio clips.
-   * 
-   * @returns {Array<AudioClip>}
-   */
-
-
-  _createClass(Otic, [{
-    key: "addAudio",
+  createClass(Otic, [{
+    key: "clips",
 
     /**
-     * Adds audio to the media library.
+     * A reference to the audio context.
      * 
-     * @param {string} name The name of this audio clip used to reference it.
-     * @param {AudioBuffer} buffer A reference to the audio buffer for this audio.
-     * @param {Array<Marker>} [markers] A breakdown of the audio into individual parts that can be used independently.
+     * @private
      * 
-     * @example
-     * 
-     * // Adding an audio clip with no markers.
-     * const levelUp = otic.addAudio('level-up', levelUpBuffer);
-     * 
-     * // Adding an audio clip with markers.
-     * const sfxMarkers = [
-     *   { name: 'walk', start: 1500, duration: 1000 },
-     *   { name: 'fall': start: 2500, duration: 1500 },
-     * ];
-     * const sfx = otic.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
+     * @property {AudioContext}
      */
+
+    /**
+     * A reference to the gain node.
+     * 
+     * @private
+     * 
+     * @property {GainNode}
+     */
+
+    /**
+     * The object that contains all of the audio clips created.
+     * 
+     * @private
+     * 
+     * @property {Array<AudioClip>}
+     */
+
+    /**
+     * Returns the created audio clips.
+     * 
+     * @returns {Array<AudioClip>}
+     */
+    get: function get() {
+      return this._clips;
+    }
+  }]);
+
+  function Otic() {
+    classCallCheck(this, Otic);
+
+    defineProperty(this, "_ctx", new AudioContext());
+
+    defineProperty(this, "_gain", this._ctx.createGain());
+
+    defineProperty(this, "_clips", []);
+  }
+  /**
+   * Adds audio to the media library.
+   * 
+   * @param {string} name The name of this audio clip used to reference it.
+   * @param {AudioBuffer} buffer A reference to the audio buffer for this audio.
+   * @param {Array<Marker>} [markers] A breakdown of the audio into individual parts that can be used independently.
+   * 
+   * @example
+   * 
+   * // Adding an audio clip with no markers.
+   * const levelUp = otic.addAudio('level-up', levelUpBuffer);
+   * 
+   * // Adding an audio clip with markers.
+   * const sfxMarkers = [
+   *   { name: 'walk', start: 1500, duration: 1000 },
+   *   { name: 'fall': start: 2500, duration: 1500 },
+   * ];
+   * const sfx = otic.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
+   */
+
+
+  createClass(Otic, [{
+    key: "addAudio",
     value: function addAudio(name, audio) {
       var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       options.ctx = this._ctx;
@@ -533,11 +598,6 @@ function () {
     value: function removeAllAudio() {
       this._clips = [];
       return this;
-    }
-  }, {
-    key: "clips",
-    get: function get() {
-      return this._clips;
     }
   }]);
 

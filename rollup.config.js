@@ -12,8 +12,8 @@ export default {
   external: [],
   plugins: [
     resolve({ extensions }),
-    commonjs(),
-    babel({ extensions, include: ['src/**/*'] }),
+    commonjs({ include: 'node_modules/**'}),
+    babel({ extensions, include: ['src/**/*'], runtimeHelpers: true }),
   ],
   output: [{
     file: pkg.module,

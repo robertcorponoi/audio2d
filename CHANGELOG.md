@@ -1,3 +1,8 @@
+0.0.7 / 2020-02-05
+==================
+* [FEATURE] Added ability to play audio clips on loop.
+* [FEATURE] Added filter.
+
 0.0.6 / 2020-02-04
 ==================
 * [TEST] Fixed a failing test after adding gain to each audio clip.

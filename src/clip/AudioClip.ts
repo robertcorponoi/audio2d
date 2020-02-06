@@ -1,9 +1,9 @@
 'use strict'
 
-import AudioClipOptions from './AudioClipOptions';
-
+import AudioClipOptions from '../options/AudioClipOptions';
+// import bitcrusher from '../effects/BitCrusherProcessor';
 import Marker from '../interfaces/Marker';
-import { AudioClipState } from './AudioClipState'
+import { AudioClipState } from '../enums/AudioClipState'
 
 /**
  * An audio clip represents a piece of audio, which is either an audio html element or an audio boffer, as
@@ -45,6 +45,15 @@ export default class AudioClip {
    * @property {AudioClipOptions}
    */
   private _options: AudioClipOptions;
+
+  /**
+   * A reference to the biquad filter node for this clip.
+   * 
+   * @private
+   * 
+   * @property {BiquadFilterNode}
+   */
+  private _filter?: BiquadFilterNode;
 
   /**
    * A reference to the gain node for this clip.
@@ -118,7 +127,7 @@ export default class AudioClip {
    * 
    * @default 100
    */
-  private _volume = 100;
+  private _volume: number = 100;
 
   /**
    * Keeps track of the previous volume of the clip.
@@ -130,11 +139,21 @@ export default class AudioClip {
   private _previousVolume: number = 1;
 
   /**
+   * Indicates whether this audio clip is played on a loop or not.
+   * 
+   * @property {boolean}
+   * 
+   * @default false
+   */
+  loop: boolean = false;
+
+  /**
    * @param {string} name The name of the audio clip.
    * @param {AudioBuffer} audio The AudioBuffer that contains the audio of the clip.
    * @param {AudioClipOptions} [options] The options passed to this audio clip.
    */
   constructor(name: string, audio: AudioBuffer, options: AudioClipOptions) {
+    // test();
     this._name = name;
 
     this._audio = audio;
@@ -144,6 +163,10 @@ export default class AudioClip {
     this._options = options;
 
     this._gain = this._options.ctx.createGain();
+
+    //this._filter.connect(this._gain);
+
+    this._gain.connect(this._options.ctx.destination);
 
     if (!this._options.markers) this._options.markers = [];
   }
@@ -201,12 +224,21 @@ export default class AudioClip {
    * 
    * @param {number} vol The new volume of the clip.
    */
-  set volume(vol: number) { 
-    this._volume = vol; 
+  set volume(vol: number) {
+    this._volume = vol;
 
     // this._gain.gain.value = this._volume / 100;
 
     this._gain.gain.setValueAtTime(this._volume / 100, this._options.ctx.currentTime);
+  }
+
+  /**
+   * Adds a biquad filter node to this clip.
+   */
+  addBiquadFilter() {
+    this._filter = this._options.ctx.createBiquadFilter();
+
+    this._filter!.connect(this._gain);
   }
 
   /**
@@ -223,13 +255,16 @@ export default class AudioClip {
 
     this._source.buffer = this._audio;
 
-    this._source.connect(this._gain);
+    if (this._filter) this._source.connect(this._filter);
+    else this._source.connect(this._gain);
 
     this._source.onended = () => {
       this._state = AudioClipState.STOPPED;
 
       this._source.onended = null;
     };
+
+    this._source.loop = this.loop;
 
     if (marker) {
       const clipMarker: (Marker | undefined) = this._options.markers?.find((m: Marker) => m.name === marker);
@@ -259,11 +294,11 @@ export default class AudioClip {
     const elapsed: number = this._options.ctx.currentTime - this._timeStartedAt;
 
     this.stop();
-    
+
     this._timePausedAt = elapsed
 
     this._options.markers?.push({ name: 'otic-pause', start: this._timePausedAt * 1000 });
-    
+
     this._state = AudioClipState.PAUSED;
   }
 
@@ -285,7 +320,7 @@ export default class AudioClip {
 
     this._timePausedAt = 0;
     this._timeStartedAt = 0;
-    
+
     this._state = AudioClipState.STOPPED;
   }
 
@@ -304,4 +339,27 @@ export default class AudioClip {
   unmute() {
     this.volume = this._previousVolume;
   }
+
+  // async bt() {
+  //   this._options.ctx.audioWorklet.addModule('https://raw.githubusercontent.com/GoogleChromeLabs/web-audio-samples/master/audio-worklet/basic/bit-crusher/bit-crusher-processor.js')
+  //   .then((blah: any) => {
+  //     console.log('hi');
+  //       console.log(blah);
+  //       const bitCrusher =
+  //         new AudioWorkletNode(this._options.ctx, 'bit-crusher-processor');
+  //       const paramBitDepth = bitCrusher.parameters.get('bitDepth');
+  //       const paramReduction = bitCrusher.parameters.get('frequencyReduction');
+    
+  //       this._source = this._options.ctx.createBufferSource();
+    
+  //       this._source.buffer = this._audio;
+    
+  //       this._source.connect(bitCrusher).connect(this._options.ctx.destination);
+    
+  //       paramReduction!.setValueAtTime(0.01, 0);
+  //       paramBitDepth!.setValueAtTime(1, 0);
+    
+  //       this._source.start();
+  //     })
+  // }
 }

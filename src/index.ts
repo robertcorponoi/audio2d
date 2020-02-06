@@ -1,7 +1,9 @@
 'use strict'
 
 import AudioClip from './clip/AudioClip';
-import AudioClipOptions from './clip/AudioClipOptions';
+import AudioClipOptions from './options/AudioClipOptions';
+
+
 
 /**
  * Otic is a web audio helper for adding sound/music to your JavaScript games.
@@ -33,17 +35,16 @@ export default class Otic {
    * @property {Array<AudioClip>}
    */
   private _clips: Array<AudioClip> = [];
-
-  constructor() {
-    this._gain.connect(this._ctx.destination);
-  }
-
+  
   /**
    * Returns the created audio clips.
    * 
    * @returns {Array<AudioClip>}
    */
   get clips(): Array<AudioClip> { return this._clips; }
+
+  constructor() {
+  }
 
   /**
    * Adds audio to the media library.
