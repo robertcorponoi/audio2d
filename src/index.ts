@@ -1,14 +1,13 @@
 'use strict'
 
+import Nodes from './nodes/Nodes';
 import AudioClip from './clip/AudioClip';
 import AudioClipOptions from './options/AudioClipOptions';
 
-
-
 /**
- * Otic is a web audio helper for adding sound/music to your JavaScript games.
+ * Audio2D is a web audio helper for adding sound/music to your JavaScript games.
  */
-export default class Otic {
+export default class Audio2D {
   /**
    * A reference to the audio context.
    * 
@@ -19,15 +18,6 @@ export default class Otic {
   private _ctx: AudioContext = new AudioContext;
 
   /**
-   * A reference to the gain node.
-   * 
-   * @private
-   * 
-   * @property {GainNode}
-   */
-  private _gain: AudioNode = this._ctx.createGain();
-
-  /**
    * The object that contains all of the audio clips created.
    * 
    * @private
@@ -35,6 +25,15 @@ export default class Otic {
    * @property {Array<AudioClip>}
    */
   private _clips: Array<AudioClip> = [];
+
+  /**
+   * A reference to the nodes module.
+   * 
+   * @private
+   * 
+   * @property {Nodes}
+   */
+  private _nodes: Nodes = new Nodes(this._ctx);
   
   /**
    * Returns the created audio clips.
@@ -43,27 +42,33 @@ export default class Otic {
    */
   get clips(): Array<AudioClip> { return this._clips; }
 
-  constructor() {
-  }
+  /**
+   * Returns the nodes module to use for creating nodes and adding them to clips.
+   * 
+   * @returns {Nodes}
+   */
+  get nodes(): Nodes { return this._nodes; }
 
   /**
    * Adds audio to the media library.
    * 
    * @param {string} name The name of this audio clip used to reference it.
    * @param {AudioBuffer} buffer A reference to the audio buffer for this audio.
-   * @param {Array<Marker>} [markers] A breakdown of the audio into individual parts that can be used independently.
+   * @param {Object} [options]
+   * @param {Array<Marker>} [options.markers] A breakdown of the audio into individual parts that can be used independently.
+   * @param {string} [options.trigger] An id or classname of a dom element that when clicked will trigger the clip to play.
    * 
    * @example
    * 
    * // Adding an audio clip with no markers.
-   * const levelUp = otic.addAudio('level-up', levelUpBuffer);
+   * const levelUp = a2d.addAudio('level-up', levelUpBuffer);
    * 
    * // Adding an audio clip with markers.
    * const sfxMarkers = [
    *   { name: 'walk', start: 1500, duration: 1000 },
    *   { name: 'fall': start: 2500, duration: 1500 },
    * ];
-   * const sfx = otic.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
+   * const sfx = a2d.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
    */
   addAudio(name: string, audio: AudioBuffer, options: AudioClipOptions = {}): AudioClip {
     options.ctx = this._ctx;
@@ -84,9 +89,9 @@ export default class Otic {
    * 
    * @example
    * 
-   * otic.addAudio('track1', buffer);
+   * a2d.addAudio('track1', buffer);
    * 
-   * const clip = otic.getAudio('track1');
+   * const clip = a2d.getAudio('track1');
    */
   getAudio(name: string): (AudioClip | undefined) {
     return this._clips.find((clip: AudioClip) => clip.name === name);
@@ -97,15 +102,15 @@ export default class Otic {
    * 
    * @param {string} name The name of the audio clip to remove.
    * 
-   * @returns {Otic} Returns this for chaining.
+   * @returns {Audio2D} Returns this for chaining.
    * 
    * @example
    * 
-   * otic.addAudio('track1', buffer);
+   * a2d.addAudio('track1', buffer);
    * 
-   * otic.removeAudio('track1');
+   * a2d.removeAudio('track1');
    */
-  removeAudio(name: string): Otic {
+  removeAudio(name: string): Audio2D {
     this._clips = this.clips.filter((clip: AudioClip) => clip.name !== name);
 
     return this;
@@ -114,16 +119,16 @@ export default class Otic {
   /**
    * Removes all audio clips from the media library.
    * 
-   * @returns {Otic} Returns this for chaining.
+   * @returns {Audio2D} Returns this for chaining.
    * 
    * @example
    * 
-   * otic.addAudio('track1', buffer1);
-   * otic.addAudio('track2', buffer2);
+   * a2d.addAudio('track1', buffer1);
+   * a2d.addAudio('track2', buffer2);
    * 
-   * otic.removeAllAudio();
+   * a2d.removeAllAudio();
    */
-  removeAllAudio(): Otic {
+  removeAllAudio(): Audio2D {
     this._clips = [];
 
     return this;

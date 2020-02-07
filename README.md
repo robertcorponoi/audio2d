@@ -2,18 +2,18 @@
   <img width="250" height="250" src="">
 </p> -->
 
-<h1 align="center">Otic</h1>
+<h1 align="center">Audio2D</h1>
 
-<p align="center">Otic is an easy way to add web audio to your JavaScript game.<p>
+<p align="center">Audio2D is an easy way to add web audio to your JavaScript game.<p>
 
 <div align="center">
 
-  [![NPM version](https://img.shields.io/npm/v/otic.svg?style=flat)](https://www.npmjs.com/package/otic)
-  [![Known Vulnerabilities](https://snyk.io/test/github/robertcorponoi/otic/badge.svg)](https://snyk.io/test/github/robertcorponoi/otic)
-  ![npm](https://img.shields.io/npm/dt/otic)
-  [![NPM downloads](https://img.shields.io/npm/dm/otic.svg?style=flat)](https://www.npmjs.com/package/otic)
-  <a href="https://badge.fury.io/js/otic"><img src="https://img.shields.io/github/issues/robertcorponoi/otic.svg" alt="issues" height="18"></a>
-  <a href="https://badge.fury.io/js/otic"><img src="https://img.shields.io/github/license/robertcorponoi/otic.svg" alt="license" height="18"></a>
+  [![NPM version](https://img.shields.io/npm/v/a2d.svg?style=flat)](https://www.npmjs.com/package/a2d)
+  [![Known Vulnerabilities](https://snyk.io/test/github/robertcorponoi/a2d/badge.svg)](https://snyk.io/test/github/robertcorponoi/a2d)
+  ![npm](https://img.shields.io/npm/dt/a2d)
+  [![NPM downloads](https://img.shields.io/npm/dm/a2d.svg?style=flat)](https://www.npmjs.com/package/a2d)
+  <a href="https://badge.fury.io/js/a2d"><img src="https://img.shields.io/github/issues/robertcorponoi/a2d.svg" alt="issues" height="18"></a>
+  <a href="https://badge.fury.io/js/a2d"><img src="https://img.shields.io/github/license/robertcorponoi/a2d.svg" alt="license" height="18"></a>
   [![Gitter](https://badges.gitter.im/gitterHQ/gitter.svg)](https://gitter.im/robertcorponoi)
 
 </div>
@@ -30,38 +30,38 @@
 
 ## **Installation**
 
-To install otic, you can use:
+To install a2d, you can use:
 
 ```bash
-$ npm install otic
+$ npm install a2d
 ```
 
 and then initialize it like so:
 
 ```js
 // Browser
-import Otic from './node_modules/otic/otic.js';
+import Audio2D from './node_modules/a2d/a2d.js';
 
 // Webpack
-import Otic from 'otic';
+import Audio2D from 'a2d';
 ```
 
 or you can use it as a script from unpkg like so:
 
 ```html
-<script type="module" src="https://unpkg.com/otic@latest/otic.js"></script>
+<script type="module" src="https://unpkg.com/a2d@latest/a2d.js"></script>
 ```
 
 ## **A Note About Preloading**
 
-After some thought while creating Otic, I decided that it should not offer loading of audio assets.
+After some thought while creating Audio2D, I decided that it should not offer loading of audio assets.
 
-I was going to initally offer it as a feature but after trying to figure out signal timing and letting the user know when the audio was loaded and ready to go, it turned into a signal based monstrosity. The great thing is that it doesn't need to be a monstrosity, there are preloaders out there, like [musk-ox](https://github.com/robertcorponoi/musk-ox)  for example, that offer to load any of your assets for you, including audio buffers which is what Otic works with.
+I was going to initally offer it as a feature but after trying to figure out signal timing and letting the user know when the audio was loaded and ready to go, it turned into a signal based monstrosity. The great thing is that it doesn't need to be a monstrosity, there are preloaders out there, like [musk-ox](https://github.com/robertcorponoi/musk-ox)  for example, that offer to load any of your assets for you, including audio buffers which is what Audio2D works with.
 
 For an example on basic usage with musk-ox, check out the following example:
 
 ```js
-const otic = new Otic();
+const a2d = new Audio2D();
 const muskox = new MuskOx();
 
 muskox.onComplete.add(loaded);
@@ -69,7 +69,7 @@ muskox.onComplete.add(loaded);
 const loaded = () => {
   const levelUpBuffer = muskox.fetch.audioBuffer('level-up');
 
-  const levelUp = otic.addAudio('level-up', levelUp);
+  const levelUp = a2d.addAudio('level-up', levelUp);
 
   levelUp.play();
 }
@@ -92,14 +92,15 @@ Creates a web audio clip from an `AudioBuffer` and returns it so you can play it
 | name            | string        | The name of the audio clip used to reference it.                                                               |         |
 | buffer          | AudioBuffer   | The buffer of the audio clip.                                                                                  |         |
 | options         | Object        |                                                                                                                |         |
-| options.markers | Array<<span>Marker> | Markers that can define specific points during the audio track that can be played independently of each other. |         |
+| options.markers | Array<<span>Marker> | Markers that can define specific points during the audio track that can be played independently of each other. |   |
+| options.trigger | string | An id or classname of a dom element that when clicked will trigger the clip to play.                                  |         |
 
 **examples:**
 
 Creating a basic audio clip with no markers:
 
 ```js
-const levelUp = otic.addAudio('level-up', levelUpBuffer);
+const levelUp = a2d.addAudio('level-up', levelUpBuffer);
 ```
 
 Creating an audio clip with specific markers:
@@ -111,7 +112,7 @@ const sfxMarkers = [
   { name: 'collect-coin': start: 4000, duration: 750 }
 ];
 
-const sfx = otic.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
+const sfx = a2d.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
 ```
 
 In the [Audio API](#audio-api) you can see how to use the markers and play only parts of a track.
@@ -127,9 +128,9 @@ Gets an audio clip added to the media library with `addAudio`.
 **example:**
 
 ```js
-otic.addAudio('track1', buffer);
+a2d.addAudio('track1', buffer);
 
-const clip = otic.getAudio('track1');
+const clip = a2d.getAudio('track1');
 ```
 
 ### **removeAudio**
@@ -143,9 +144,9 @@ Removes an audio clip from the media library.
 **example:**
 
 ```js
-otic.addAudio('track1', buffer);
+a2d.addAudio('track1', buffer);
 
-otic.removeAudio('track1');
+a2d.removeAudio('track1');
 ```
 
 ### **removeAllAudio**
@@ -155,10 +156,10 @@ Removes all audio clips from the media library.
 **example:**
 
 ```js
-otic.addAudio('track1', buffer1);
-otic.addAudio('track2', buffer2);
+a2d.addAudio('track1', buffer1);
+a2d.addAudio('track2', buffer2);
 
-otic.removeAllAudio();
+a2d.removeAllAudio();
 ```
 
 ## **Audio Clip**
@@ -201,6 +202,40 @@ Sets the volume for the clip to use from here on out. The volume provided can be
 
 ## **Audio Clip Methods**
 
+### **addNode**
+
+You can choose to add a web audio node to the clip. Nodes will be connected to each other in the order added with the source always at the start and the gain always at the end of the chain.
+
+The available nodes are:
+
+- biquadFilter
+
+and they can be created through the `nodes` property on the audio2d instance like so:
+
+**example:**
+
+```js
+const track = a2d.addAudio('track-1', track1Buffer);
+
+const bf = a2d.nodes.biquadFilter();
+
+track.addNode(bf);
+```
+
+After adding nodes, you can then modify the properties of the nodes by the `nodes` property of the audio clip and the name of the node like so:
+
+```js
+const track = a2d.addAudio('track-1', track1Buffer);
+
+a2d.nodes.biquadFilter();
+
+track.addNode(bf);
+
+// Modifying the biquad filter.
+track.nodes.biquadFilter.Q.value = 100;
+track.nodes.biquadFilter.frequency.value = 1;
+```
+
 ### **play**
 
 Plays an audio clip fully or at one of the markers.
@@ -214,7 +249,7 @@ Plays an audio clip fully or at one of the markers.
 Creating an audio clip and playing it in its entirety:
 
 ```js
-const levelUp = otic.addAudio('level-up', levelUpBuffer);
+const levelUp = a2d.addAudio('level-up', levelUpBuffer);
 
 levelUp.play();
 ```
@@ -228,7 +263,7 @@ const sfxMarkers = [
   { name: 'collect-coin': start: 4000, duration: 750 }
 ];
 
-const sfx = otic.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
+const sfx = a2d.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
 
 // play just the falling sound.
 sfx.play('fall');
@@ -241,7 +276,7 @@ Pauses an audio clip.
 **example:**
 
 ```js
-const sfx = otic.addAudio('sfx', sfxBuffer);
+const sfx = a2d.addAudio('sfx', sfxBuffer);
 
 sfx.play();
 
@@ -257,7 +292,7 @@ Resumes playing an audio clip from a paused state.
 ***example:**
 
 ```js
-const sfx = otic.addAudio('sfx', sfxBuffer);
+const sfx = a2d.addAudio('sfx', sfxBuffer);
 
 sfx.play();
 
@@ -277,7 +312,7 @@ Completely stops the playback of an audio clip and resets it so next time it pla
 **example:**
 
 ```js
-const sfx = otic.addAudio('sfx', sfxBuffer);
+const sfx = a2d.addAudio('sfx', sfxBuffer);
 
 sfx.play();
 
@@ -293,7 +328,7 @@ Mutes an audio clip but saves the previous volume so when its unmuted it will go
 **example:**
 
 ```js
-const sfx = otic.addAudio('sfx', sfxBuffer);
+const sfx = a2d.addAudio('sfx', sfxBuffer);
 
 sfx.play();
 sfx.mute();
@@ -306,7 +341,7 @@ Unmutes an audio clip and sets the volume to what it was before it was muted.
 **example:**
 
 ```js
-const sfx = otic.addAudio('sfx', sfxBuffer);
+const sfx = a2d.addAudio('sfx', sfxBuffer);
 
 sfx.play();
 

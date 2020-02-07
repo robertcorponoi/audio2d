@@ -1,8 +1,9 @@
 {
-  "name": "otic",
-  "version": "0.0.7",
-  "description": "TODO",
+  "name": "audio2d",
+  "version": "0.0.8",
+  "description": "Easy to use API to add the power of web audio to your game.",
   "main": "index.js",
+  "module": "audio2d.js",
   "scripts": {
     "tsconfig": "tsc --init --declaration --allowSyntheticDefaultImports --target esnext --outDir lib",
     "type-check": "tsc --noEmit",
@@ -14,11 +15,26 @@
     "bundle:watch": "rollup -c --watch",
     "test": "node test/server.js"
   },
-  "repository": {},
-  "keywords": [],
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:robertcorponoi/audio2d"
+  },
+  "keywords": [
+    "audio",
+    "sprite",
+    "game",
+    "games",
+    "web",
+    "web audio",
+    "effects",
+    "bitcrusher",
+    "2d",
+    "music",
+    "track",
+    "clip"
+  ],
+  "author": "Robert Corponoi",
   "license": "MIT",
-  "module": "otic.js",
   "typings": "lib/index.ts",
   "devDependencies": {
     "@babel/cli": "^7.8.4",
@@ -29,7 +45,7 @@
     "@babel/plugin-transform-runtime": "^7.8.3",
     "@babel/preset-env": "^7.8.4",
     "@babel/preset-typescript": "^7.8.3",
-    "musk-ox": "^5.0.0",
+    "musk-ox": "^5.0.1",
     "rollup": "^1.31.0",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.1.0",

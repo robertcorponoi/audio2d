@@ -1,7 +1,7 @@
 'use strict'
 
 import Otic from '../otic.js';
-import MuskOx from '../node_modules/musk-ox/muskox.js';
+import MuskOx from 'musk-ox/muskox';
 
 let otic;
 let muskOx;
@@ -183,6 +183,8 @@ describe('Managing Audio Clips', () => {
     muskOx.start();
   });
 });
+
+describe('Adding Nodes to ')
 
 describe('Playing Audio Clips', () => {
   it('should update the state to PLAYING when the clip is playing', done => {
@@ -416,10 +418,3 @@ describe('Muting and Unmuting Clips', () => {
     muskOx.start();
   });
 });
-
-// const markers = [
-//   { name: 'first', start: 1000, duration: 1000 },
-//   { name: 'second', start: 2000, duration: 750 }
-// ];
-
-// const a = otic.addAudio('blah', g1, { markers });

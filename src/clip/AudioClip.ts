@@ -1,8 +1,10 @@
 'use strict'
 
 import AudioClipOptions from '../options/AudioClipOptions';
-// import bitcrusher from '../effects/BitCrusherProcessor';
+
+import Node from '../interfaces/Node';
 import Marker from '../interfaces/Marker';
+
 import { AudioClipState } from '../enums/AudioClipState'
 
 /**
@@ -45,15 +47,6 @@ export default class AudioClip {
    * @property {AudioClipOptions}
    */
   private _options: AudioClipOptions;
-
-  /**
-   * A reference to the biquad filter node for this clip.
-   * 
-   * @private
-   * 
-   * @property {BiquadFilterNode}
-   */
-  private _filter?: BiquadFilterNode;
 
   /**
    * A reference to the gain node for this clip.
@@ -139,6 +132,24 @@ export default class AudioClip {
   private _previousVolume: number = 1;
 
   /**
+   * A reference to the nodes that have been added for this clip.
+   * 
+   * @private
+   * 
+   * @property {Array<Node>}
+   */
+  private _nodesref: Array<Node> = [];
+
+  /**
+   * A reference to the nodes that have been added in a way that allows them to be retrieved easily.
+   * 
+   * @private
+   * 
+   * @property {*}
+   */
+  private _nodes: any = {};
+
+  /**
    * Indicates whether this audio clip is played on a loop or not.
    * 
    * @property {boolean}
@@ -153,7 +164,6 @@ export default class AudioClip {
    * @param {AudioClipOptions} [options] The options passed to this audio clip.
    */
   constructor(name: string, audio: AudioBuffer, options: AudioClipOptions) {
-    // test();
     this._name = name;
 
     this._audio = audio;
@@ -164,9 +174,9 @@ export default class AudioClip {
 
     this._gain = this._options.ctx.createGain();
 
-    //this._filter.connect(this._gain);
-
     this._gain.connect(this._options.ctx.destination);
+
+    if (this._options.trigger) this._setupTrigger();
 
     if (!this._options.markers) this._options.markers = [];
   }
@@ -227,24 +237,52 @@ export default class AudioClip {
   set volume(vol: number) {
     this._volume = vol;
 
-    // this._gain.gain.value = this._volume / 100;
-
     this._gain.gain.setValueAtTime(this._volume / 100, this._options.ctx.currentTime);
   }
 
   /**
-   * Adds a biquad filter node to this clip.
+   * Gets the created nodes.
+   * 
+   * @returns {*}
    */
-  addBiquadFilter() {
-    this._filter = this._options.ctx.createBiquadFilter();
+  get nodes(): any { return this._nodes; }
 
-    this._filter!.connect(this._gain);
+  /**
+   * Adds a custom node from `app.nodes[nodeName]`.
+   * 
+   * @param {Node} node The node to add to this clip.
+   * 
+   * @example
+   * 
+   * const track = a2d.addAudio('track-1', track1Buffer);
+   * 
+   * const bf = a2d.nodes.biquadFilter();
+   * track.addNode(bf);
+   */
+  addNode(node: Node) {
+    this._nodes[node.name] = node.instance;
+
+    this._nodesref.push(node);
+
+    if (this._nodesref.length === 1) return;
+
+    const latestNode: Node = this._nodesref[this._nodesref.length - 2];
+
+    node.instance.connect(latestNode.instance);
   }
 
   /**
    * Plays this audio clip.
    * 
    * @param {string} marker The name of the marker of the part of the clip to play.
+   * 
+   * @example
+   * 
+   * const sfxMarkers = [{ name: 'walk', start: 1500, duration: 1000 }, { name: 'fall': start: 2500, duration: 1500 }];
+   * const sfx = a2d.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
+   * 
+   * // play just the falling sound.
+   * sfx.play('fall');
    */
   play(marker?: string) {
     const offset: number = this._timePausedAt;
@@ -255,8 +293,16 @@ export default class AudioClip {
 
     this._source.buffer = this._audio;
 
-    if (this._filter) this._source.connect(this._filter);
-    else this._source.connect(this._gain);
+    if (this._nodesref.length > 0) {
+      const firstNode: Node = this._nodesref[0];
+      const latestNode: Node = this._nodesref[this._nodesref.length - 1]
+
+      this._source.connect(latestNode.instance);
+
+      firstNode.instance.connect(this._gain);
+    } else {
+      this._source.connect(this._gain);
+    }
 
     this._source.onended = () => {
       this._state = AudioClipState.STOPPED;
@@ -273,7 +319,7 @@ export default class AudioClip {
 
       this._source.start(0, clipMarker.start / 1000, clipMarker.duration ? clipMarker.duration / 1000 : undefined);
 
-      if (clipMarker.name === 'otic-pause') this._options.markers = this._options.markers?.filter((marker: Marker) => marker.name !== 'otic-pause');
+      if (clipMarker.name === 'a2d-pause') this._options.markers = this._options.markers?.filter((marker: Marker) => marker.name !== 'a2d-pause');
     } else {
       this._source.start();
     }
@@ -289,6 +335,15 @@ export default class AudioClip {
 
   /**
    * Pause the currently playing audio.
+   * 
+   * @example
+   * 
+   * const sfx = a2d.addAudio('sfx', sfxBuffer);
+   * sfx.play();
+   * 
+   * setTimeout(() => {
+   *   sfx.pause();
+   * }, 1000);
    */
   pause() {
     const elapsed: number = this._options.ctx.currentTime - this._timeStartedAt;
@@ -297,22 +352,39 @@ export default class AudioClip {
 
     this._timePausedAt = elapsed
 
-    this._options.markers?.push({ name: 'otic-pause', start: this._timePausedAt * 1000 });
+    this._options.markers?.push({ name: 'a2d-pause', start: this._timePausedAt * 1000 });
 
     this._state = AudioClipState.PAUSED;
   }
 
   /**
    * Resumes playing this clip from when it was paused.
+   * 
+   * @example
+   * 
+   * const sfx = a2d.addAudio('sfx', sfxBuffer);
+   * sfx.play();
+   * sfx.pause();
+   * 
+   * setTimeout(() => {
+   *   sfx.resume();
+   * }, 1000);
    */
   resume() {
-    this.play('otic-pause');
+    this.play('a2d-pause');
   }
 
   /**
    * Stops the playback of this audio.
    * 
    * @returns {AudioClip} Returns this for chaining.
+   * 
+   * @example
+   * 
+   * const sfx = a2d.addAudio('sfx', sfxBuffer);
+   * 
+   * sfx.play();
+   * sfx.stop();
    */
   stop() {
     this._source.disconnect();
@@ -326,6 +398,13 @@ export default class AudioClip {
 
   /**
    * Mutes this clip.
+   * 
+   * @example
+   * 
+   * const sfx = a2d.addAudio('sfx', sfxBuffer);
+   * 
+   * sfx.play();
+   * sfx.mute();
    */
   mute() {
     this._previousVolume = this.volume;
@@ -335,9 +414,30 @@ export default class AudioClip {
 
   /**
    * Puts the volume back to the value it was at before the clip was muted.
+   * 
+   * @example
+   * 
+   * const sfx = a2d.addAudio('sfx', sfxBuffer);
+   * sfx.play();
+   * 
+   * sfx.mute();
+   * sfx.unmute();
    */
   unmute() {
     this.volume = this._previousVolume;
+  }
+
+  /**
+   * Sets up an onclick event on a trigger element if one was provided in the options.
+   * 
+   * @private
+   */
+  private _setupTrigger() {
+    const el: (HTMLElement | null) = document.querySelector(this._options.trigger!);
+
+    if (!el) return;
+
+    el.addEventListener('click', () => this.play());
   }
 
   // async bt() {

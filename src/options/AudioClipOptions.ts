@@ -14,7 +14,14 @@ export default interface AudioClipOptions {
   markers?: Array<Marker>;
 
   /**
-   * Any other references that need to be passed by otic.
+   * The id or classname of an element that when clicked it will trigger the clip to play.
+   * 
+   * @property {string}
+   */
+  trigger?: string;
+
+  /**
+   * Any other references that need to be passed by audio2d.
    * 
    * @property {*}
    */

@@ -42,6 +42,64 @@ function _defineProperty(obj, key, value) {
 var defineProperty = _defineProperty;
 
 /**
+ * Provides an interface for adding web audio nodes.
+ */
+var Nodes =
+/*#__PURE__*/
+function () {
+  /**
+   * A reference to the AudioContext.
+   * 
+   * @private
+   * 
+   * @property {AudioContext}
+   */
+
+  /**
+   * @param {AudioContext} ctx A reference to the AudioContext.
+   */
+  function Nodes(ctx) {
+    classCallCheck(this, Nodes);
+
+    defineProperty(this, "_ctx", void 0);
+
+    this._ctx = ctx;
+  }
+  /**
+   * Creates a biquadFilter node.
+   * 
+   * @returns {Node}
+   */
+
+
+  createClass(Nodes, [{
+    key: "biquadFilter",
+    value: function biquadFilter() {
+      return {
+        name: 'biquadFilter',
+        instance: this._ctx.createBiquadFilter()
+      };
+    }
+    /**
+     * Creates a gain node.
+     * 
+     * @returns {Node}
+     */
+
+  }, {
+    key: "gain",
+    value: function gain() {
+      return {
+        name: 'gain',
+        instance: this._ctx.createGain()
+      };
+    }
+  }]);
+
+  return Nodes;
+}();
+
+/**
  * Describes the different states available for an audio clip.
  */
 
@@ -91,14 +149,6 @@ function () {
    * @private
    * 
    * @property {AudioClipOptions}
-   */
-
-  /**
-   * A reference to the biquad filter node for this clip.
-   * 
-   * @private
-   * 
-   * @property {BiquadFilterNode}
    */
 
   /**
@@ -176,6 +226,22 @@ function () {
    */
 
   /**
+   * A reference to the nodes that have been added for this clip.
+   * 
+   * @private
+   * 
+   * @property {Array<Node>}
+   */
+
+  /**
+   * A reference to the nodes that have been added in a way that allows them to be retrieved easily.
+   * 
+   * @private
+   * 
+   * @property {*}
+   */
+
+  /**
    * Indicates whether this audio clip is played on a loop or not.
    * 
    * @property {boolean}
@@ -199,8 +265,6 @@ function () {
 
     defineProperty(this, "_options", void 0);
 
-    defineProperty(this, "_filter", void 0);
-
     defineProperty(this, "_gain", void 0);
 
     defineProperty(this, "_state", AudioClipState.STOPPED);
@@ -219,17 +283,21 @@ function () {
 
     defineProperty(this, "_previousVolume", 1);
 
+    defineProperty(this, "_nodesref", []);
+
+    defineProperty(this, "_nodes", {});
+
     defineProperty(this, "loop", false);
 
-    // test();
     this._name = name;
     this._audio = audio;
     this._duration = audio.duration;
     this._options = options;
-    this._gain = this._options.ctx.createGain(); //this._filter.connect(this._gain);
+    this._gain = this._options.ctx.createGain();
 
     this._gain.connect(this._options.ctx.destination);
 
+    if (this._options.trigger) this._setupTrigger();
     if (!this._options.markers) this._options.markers = [];
   }
   /**
@@ -240,20 +308,41 @@ function () {
 
 
   createClass(AudioClip, [{
-    key: "addBiquadFilter",
+    key: "addNode",
 
     /**
-     * Adds a biquad filter node to this clip.
+     * Adds a custom node from `app.nodes[nodeName]`.
+     * 
+     * @param {Node} node The node to add to this clip.
+     * 
+     * @example
+     * 
+     * const track = a2d.addAudio('track-1', track1Buffer);
+     * 
+     * const bf = a2d.nodes.biquadFilter();
+     * track.addNode(bf);
      */
-    value: function addBiquadFilter() {
-      this._filter = this._options.ctx.createBiquadFilter();
+    value: function addNode(node) {
+      this._nodes[node.name] = node.instance;
 
-      this._filter.connect(this._gain);
+      this._nodesref.push(node);
+
+      if (this._nodesref.length === 1) return;
+      var latestNode = this._nodesref[this._nodesref.length - 2];
+      node.instance.connect(latestNode.instance);
     }
     /**
      * Plays this audio clip.
      * 
      * @param {string} marker The name of the marker of the part of the clip to play.
+     * 
+     * @example
+     * 
+     * const sfxMarkers = [{ name: 'walk', start: 1500, duration: 1000 }, { name: 'fall': start: 2500, duration: 1500 }];
+     * const sfx = a2d.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
+     * 
+     * // play just the falling sound.
+     * sfx.play('fall');
      */
 
   }, {
@@ -265,7 +354,17 @@ function () {
       this._gain.gain.value = this._volume / 100;
       this._source = this._options.ctx.createBufferSource();
       this._source.buffer = this._audio;
-      if (this._filter) this._source.connect(this._filter);else this._source.connect(this._gain);
+
+      if (this._nodesref.length > 0) {
+        var firstNode = this._nodesref[0];
+        var latestNode = this._nodesref[this._nodesref.length - 1];
+
+        this._source.connect(latestNode.instance);
+
+        firstNode.instance.connect(this._gain);
+      } else {
+        this._source.connect(this._gain);
+      }
 
       this._source.onended = function () {
         _this._state = AudioClipState.STOPPED;
@@ -284,8 +383,8 @@ function () {
 
         this._source.start(0, clipMarker.start / 1000, clipMarker.duration ? clipMarker.duration / 1000 : undefined);
 
-        if (clipMarker.name === 'otic-pause') this._options.markers = (_this$_options$marker2 = this._options.markers) === null || _this$_options$marker2 === void 0 ? void 0 : _this$_options$marker2.filter(function (marker) {
-          return marker.name !== 'otic-pause';
+        if (clipMarker.name === 'a2d-pause') this._options.markers = (_this$_options$marker2 = this._options.markers) === null || _this$_options$marker2 === void 0 ? void 0 : _this$_options$marker2.filter(function (marker) {
+          return marker.name !== 'a2d-pause';
         });
       } else {
         this._source.start();
@@ -298,6 +397,15 @@ function () {
     }
     /**
      * Pause the currently playing audio.
+     * 
+     * @example
+     * 
+     * const sfx = a2d.addAudio('sfx', sfxBuffer);
+     * sfx.play();
+     * 
+     * setTimeout(() => {
+     *   sfx.pause();
+     * }, 1000);
      */
 
   }, {
@@ -309,24 +417,41 @@ function () {
       this.stop();
       this._timePausedAt = elapsed;
       (_this$_options$marker3 = this._options.markers) === null || _this$_options$marker3 === void 0 ? void 0 : _this$_options$marker3.push({
-        name: 'otic-pause',
+        name: 'a2d-pause',
         start: this._timePausedAt * 1000
       });
       this._state = AudioClipState.PAUSED;
     }
     /**
      * Resumes playing this clip from when it was paused.
+     * 
+     * @example
+     * 
+     * const sfx = a2d.addAudio('sfx', sfxBuffer);
+     * sfx.play();
+     * sfx.pause();
+     * 
+     * setTimeout(() => {
+     *   sfx.resume();
+     * }, 1000);
      */
 
   }, {
     key: "resume",
     value: function resume() {
-      this.play('otic-pause');
+      this.play('a2d-pause');
     }
     /**
      * Stops the playback of this audio.
      * 
      * @returns {AudioClip} Returns this for chaining.
+     * 
+     * @example
+     * 
+     * const sfx = a2d.addAudio('sfx', sfxBuffer);
+     * 
+     * sfx.play();
+     * sfx.stop();
      */
 
   }, {
@@ -341,6 +466,13 @@ function () {
     }
     /**
      * Mutes this clip.
+     * 
+     * @example
+     * 
+     * const sfx = a2d.addAudio('sfx', sfxBuffer);
+     * 
+     * sfx.play();
+     * sfx.mute();
      */
 
   }, {
@@ -351,12 +483,37 @@ function () {
     }
     /**
      * Puts the volume back to the value it was at before the clip was muted.
+     * 
+     * @example
+     * 
+     * const sfx = a2d.addAudio('sfx', sfxBuffer);
+     * sfx.play();
+     * 
+     * sfx.mute();
+     * sfx.unmute();
      */
 
   }, {
     key: "unmute",
     value: function unmute() {
       this.volume = this._previousVolume;
+    }
+    /**
+     * Sets up an onclick event on a trigger element if one was provided in the options.
+     * 
+     * @private
+     */
+
+  }, {
+    key: "_setupTrigger",
+    value: function _setupTrigger() {
+      var _this2 = this;
+
+      var el = document.querySelector(this._options.trigger);
+      if (!el) return;
+      el.addEventListener('click', function () {
+        return _this2.play();
+      });
     } // async bt() {
     //   this._options.ctx.audioWorklet.addModule('https://raw.githubusercontent.com/GoogleChromeLabs/web-audio-samples/master/audio-worklet/basic/bit-crusher/bit-crusher-processor.js')
     //   .then((blah: any) => {
@@ -444,9 +601,20 @@ function () {
      */
     ,
     set: function set(vol) {
-      this._volume = vol; // this._gain.gain.value = this._volume / 100;
+      this._volume = vol;
 
       this._gain.gain.setValueAtTime(this._volume / 100, this._options.ctx.currentTime);
+    }
+    /**
+     * Gets the created nodes.
+     * 
+     * @returns {*}
+     */
+
+  }, {
+    key: "nodes",
+    get: function get() {
+      return this._nodes;
     }
   }]);
 
@@ -454,80 +622,45 @@ function () {
 }();
 
 /**
- * Otic is a web audio helper for adding sound/music to your JavaScript games.
+ * Audio2D is a web audio helper for adding sound/music to your JavaScript games.
  */
-var Otic =
+var Audio2D =
 /*#__PURE__*/
 function () {
-  createClass(Otic, [{
-    key: "clips",
-
-    /**
-     * A reference to the audio context.
-     * 
-     * @private
-     * 
-     * @property {AudioContext}
-     */
-
-    /**
-     * A reference to the gain node.
-     * 
-     * @private
-     * 
-     * @property {GainNode}
-     */
-
-    /**
-     * The object that contains all of the audio clips created.
-     * 
-     * @private
-     * 
-     * @property {Array<AudioClip>}
-     */
-
-    /**
-     * Returns the created audio clips.
-     * 
-     * @returns {Array<AudioClip>}
-     */
-    get: function get() {
-      return this._clips;
-    }
-  }]);
-
-  function Otic() {
-    classCallCheck(this, Otic);
+  function Audio2D() {
+    classCallCheck(this, Audio2D);
 
     defineProperty(this, "_ctx", new AudioContext());
 
-    defineProperty(this, "_gain", this._ctx.createGain());
-
     defineProperty(this, "_clips", []);
+
+    defineProperty(this, "_nodes", new Nodes(this._ctx));
   }
-  /**
-   * Adds audio to the media library.
-   * 
-   * @param {string} name The name of this audio clip used to reference it.
-   * @param {AudioBuffer} buffer A reference to the audio buffer for this audio.
-   * @param {Array<Marker>} [markers] A breakdown of the audio into individual parts that can be used independently.
-   * 
-   * @example
-   * 
-   * // Adding an audio clip with no markers.
-   * const levelUp = otic.addAudio('level-up', levelUpBuffer);
-   * 
-   * // Adding an audio clip with markers.
-   * const sfxMarkers = [
-   *   { name: 'walk', start: 1500, duration: 1000 },
-   *   { name: 'fall': start: 2500, duration: 1500 },
-   * ];
-   * const sfx = otic.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
-   */
 
-
-  createClass(Otic, [{
+  createClass(Audio2D, [{
     key: "addAudio",
+
+    /**
+     * Adds audio to the media library.
+     * 
+     * @param {string} name The name of this audio clip used to reference it.
+     * @param {AudioBuffer} buffer A reference to the audio buffer for this audio.
+     * @param {Object} [options]
+     * @param {Array<Marker>} [options.markers] A breakdown of the audio into individual parts that can be used independently.
+     * @param {string} [options.trigger] An id or classname of a dom element that when clicked will trigger the clip to play.
+     * 
+     * @example
+     * 
+     * // Adding an audio clip with no markers.
+     * const levelUp = a2d.addAudio('level-up', levelUpBuffer);
+     * 
+     * // Adding an audio clip with markers.
+     * const sfxMarkers = [
+     *   { name: 'walk', start: 1500, duration: 1000 },
+     *   { name: 'fall': start: 2500, duration: 1500 },
+     * ];
+     * const sfx = a2d.addAudio('sfx', sfxBuffer, { markers: sxfMarkers });
+     */
     value: function addAudio(name, audio) {
       var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       options.ctx = this._ctx;
@@ -546,9 +679,9 @@ function () {
      * 
      * @example
      * 
-     * otic.addAudio('track1', buffer);
+     * a2d.addAudio('track1', buffer);
      * 
-     * const clip = otic.getAudio('track1');
+     * const clip = a2d.getAudio('track1');
      */
 
   }, {
@@ -563,13 +696,13 @@ function () {
      * 
      * @param {string} name The name of the audio clip to remove.
      * 
-     * @returns {Otic} Returns this for chaining.
+     * @returns {Audio2D} Returns this for chaining.
      * 
      * @example
      * 
-     * otic.addAudio('track1', buffer);
+     * a2d.addAudio('track1', buffer);
      * 
-     * otic.removeAudio('track1');
+     * a2d.removeAudio('track1');
      */
 
   }, {
@@ -583,14 +716,14 @@ function () {
     /**
      * Removes all audio clips from the media library.
      * 
-     * @returns {Otic} Returns this for chaining.
+     * @returns {Audio2D} Returns this for chaining.
      * 
      * @example
      * 
-     * otic.addAudio('track1', buffer1);
-     * otic.addAudio('track2', buffer2);
+     * a2d.addAudio('track1', buffer1);
+     * a2d.addAudio('track2', buffer2);
      * 
-     * otic.removeAllAudio();
+     * a2d.removeAllAudio();
      */
 
   }, {
@@ -599,9 +732,31 @@ function () {
       this._clips = [];
       return this;
     }
+  }, {
+    key: "clips",
+
+    /**
+     * Returns the created audio clips.
+     * 
+     * @returns {Array<AudioClip>}
+     */
+    get: function get() {
+      return this._clips;
+    }
+    /**
+     * Returns the nodes module to use for creating nodes and adding them to clips.
+     * 
+     * @returns {Nodes}
+     */
+
+  }, {
+    key: "nodes",
+    get: function get() {
+      return this._nodes;
+    }
   }]);
 
-  return Otic;
+  return Audio2D;
 }();
 
-export default Otic;
+export default Audio2D;

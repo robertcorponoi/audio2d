@@ -1,3 +1,11 @@
+0.0.8 / 2020-02-06
+==================
+* [FEATURE] Added a `trigger` option to audio clips that allows you to specify the id or classname of a dom element that when clicked will trigger the clip to play.
+* [FEATURE] Added ability to add any node to audio clips through an easy to use API.
+* [MISC] Removed `addFilter` method in support of the method defined above.
+* [MISC] Added jsdoc examples to audio clip methods.
+* [MISC] Updated musk-ox to latest version.
+
 0.0.7 / 2020-02-05
 ==================
 * [FEATURE] Added ability to play audio clips on loop.
