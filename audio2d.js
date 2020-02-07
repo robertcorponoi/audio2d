@@ -287,6 +287,8 @@ function () {
 
     defineProperty(this, "_nodes", {});
 
+    defineProperty(this, "_effects", {});
+
     defineProperty(this, "loop", false);
 
     this._name = name;
@@ -348,33 +350,17 @@ function () {
   }, {
     key: "play",
     value: function play(marker) {
-      var _this = this;
-
       var offset = this._timePausedAt;
-      this._gain.gain.value = this._volume / 100;
       this._source = this._options.ctx.createBufferSource();
       this._source.buffer = this._audio;
-
-      if (this._nodesref.length > 0) {
-        var firstNode = this._nodesref[0];
-        var latestNode = this._nodesref[this._nodesref.length - 1];
-
-        this._source.connect(latestNode.instance);
-
-        firstNode.instance.connect(this._gain);
-      } else {
-        this._source.connect(this._gain);
-      }
-
-      this._source.onended = function () {
-        _this._state = AudioClipState.STOPPED;
-        _this._source.onended = null;
-      };
-
       this._source.loop = this.loop;
 
+      this._connectNodes();
+
+      this._oncomplete();
+
       if (marker) {
-        var _this$_options$marker, _this$_options$marker2;
+        var _this$_options$marker;
 
         var clipMarker = (_this$_options$marker = this._options.markers) === null || _this$_options$marker === void 0 ? void 0 : _this$_options$marker.find(function (m) {
           return m.name === marker;
@@ -383,9 +369,7 @@ function () {
 
         this._source.start(0, clipMarker.start / 1000, clipMarker.duration ? clipMarker.duration / 1000 : undefined);
 
-        if (clipMarker.name === 'a2d-pause') this._options.markers = (_this$_options$marker2 = this._options.markers) === null || _this$_options$marker2 === void 0 ? void 0 : _this$_options$marker2.filter(function (marker) {
-          return marker.name !== 'a2d-pause';
-        });
+        this._resetPause(clipMarker);
       } else {
         this._source.start();
       }
@@ -411,12 +395,12 @@ function () {
   }, {
     key: "pause",
     value: function pause() {
-      var _this$_options$marker3;
+      var _this$_options$marker2;
 
       var elapsed = this._options.ctx.currentTime - this._timeStartedAt;
       this.stop();
       this._timePausedAt = elapsed;
-      (_this$_options$marker3 = this._options.markers) === null || _this$_options$marker3 === void 0 ? void 0 : _this$_options$marker3.push({
+      (_this$_options$marker2 = this._options.markers) === null || _this$_options$marker2 === void 0 ? void 0 : _this$_options$marker2.push({
         name: 'a2d-pause',
         start: this._timePausedAt * 1000
       });
@@ -507,31 +491,67 @@ function () {
   }, {
     key: "_setupTrigger",
     value: function _setupTrigger() {
-      var _this2 = this;
+      var _this = this;
 
       var el = document.querySelector(this._options.trigger);
       if (!el) return;
       el.addEventListener('click', function () {
-        return _this2.play();
+        return _this.play();
       });
-    } // async bt() {
-    //   this._options.ctx.audioWorklet.addModule('https://raw.githubusercontent.com/GoogleChromeLabs/web-audio-samples/master/audio-worklet/basic/bit-crusher/bit-crusher-processor.js')
-    //   .then((blah: any) => {
-    //     console.log('hi');
-    //       console.log(blah);
-    //       const bitCrusher =
-    //         new AudioWorkletNode(this._options.ctx, 'bit-crusher-processor');
-    //       const paramBitDepth = bitCrusher.parameters.get('bitDepth');
-    //       const paramReduction = bitCrusher.parameters.get('frequencyReduction');
-    //       this._source = this._options.ctx.createBufferSource();
-    //       this._source.buffer = this._audio;
-    //       this._source.connect(bitCrusher).connect(this._options.ctx.destination);
-    //       paramReduction!.setValueAtTime(0.01, 0);
-    //       paramBitDepth!.setValueAtTime(1, 0);
-    //       this._source.start();
-    //     })
-    // }
+    }
+    /**
+     * Connects the nodes that have been added through `addNode`.
+     * 
+     * @private
+     */
 
+  }, {
+    key: "_connectNodes",
+    value: function _connectNodes() {
+      if (this._nodesref.length > 0) {
+        var firstNode = this._nodesref[0];
+        var latestNode = this._nodesref[this._nodesref.length - 1];
+
+        this._source.connect(latestNode.instance);
+
+        firstNode.instance.connect(this._gain);
+      } else {
+        this._source.connect(this._gain);
+      }
+    }
+    /**
+     * Specify what happens when a clip is finished playing.
+     * 
+     * @private
+     */
+
+  }, {
+    key: "_oncomplete",
+    value: function _oncomplete() {
+      var _this2 = this;
+
+      this._source.onended = function () {
+        _this2._state = AudioClipState.STOPPED;
+        _this2._source.onended = null;
+      };
+    }
+    /**
+     * Resets any markers set by `pause`.
+     * 
+     * @private
+     * 
+     * @param {Marker} clipMarker The marker to check if should be removed.
+     */
+
+  }, {
+    key: "_resetPause",
+    value: function _resetPause(clipMarker) {
+      var _this$_options$marker3;
+
+      if (clipMarker.name === 'a2d-pause') this._options.markers = (_this$_options$marker3 = this._options.markers) === null || _this$_options$marker3 === void 0 ? void 0 : _this$_options$marker3.filter(function (marker) {
+        return marker.name !== 'a2d-pause';
+      });
+    }
   }, {
     key: "name",
     get: function get() {

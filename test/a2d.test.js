@@ -1,20 +1,20 @@
 'use strict'
 
-import Otic from '../otic.js';
-import MuskOx from 'musk-ox/muskox';
+import Audio2D from '../audio2d.js';
+import MuskOx from '../node_modules/musk-ox/muskox.js';
 
-let otic;
+let a2d;
 let muskOx;
 
 mocha.setup({ globals: '__VUE_DEVTOOLS_TOAST__' });
 
 beforeEach(() => {
-  otic = new Otic();
-  muskOx = new MuskOx({ audioContext: otic._ctx });
+  a2d = new Audio2D();
+  muskOx = new MuskOx({ audioContext: a2d._ctx });
 });
 
 afterEach(() => {
-  otic = null;
+  a2d = null;
   muskOx = null;
 });
 
@@ -23,7 +23,7 @@ describe('Getting and Setting Properties', () => {
     muskOx.onComplete.add(() => {
       const sound = muskOx.fetch.audioBuffer('sound');
 
-      const track1 = otic.addAudio('track1', sound);
+      const track1 = a2d.addAudio('track1', sound);
 
       chai.expect(track1.name).to.equal('track1');
 
@@ -39,7 +39,7 @@ describe('Getting and Setting Properties', () => {
     muskOx.onComplete.add(() => {
       const sound = muskOx.fetch.audioBuffer('sound');
 
-      const track1 = otic.addAudio('track1', sound);
+      const track1 = a2d.addAudio('track1', sound);
 
       chai.expect(track1.state).to.equal('STOPPED');
 
@@ -55,7 +55,7 @@ describe('Getting and Setting Properties', () => {
     muskOx.onComplete.add(() => {
       const sound = muskOx.fetch.audioBuffer('sound');
 
-      const track1 = otic.addAudio('track1', sound);
+      const track1 = a2d.addAudio('track1', sound);
 
       track1.play();
       track1.mute();
@@ -78,7 +78,7 @@ describe('Getting and Setting Properties', () => {
     muskOx.onComplete.add(() => {
       const sound = muskOx.fetch.audioBuffer('sound');
 
-      const track1 = otic.addAudio('track1', sound);
+      const track1 = a2d.addAudio('track1', sound);
 
       chai.expect(track1.duration).to.equal(5.7585625);
 
@@ -94,7 +94,7 @@ describe('Getting and Setting Properties', () => {
     muskOx.onComplete.add(() => {
       const sound = muskOx.fetch.audioBuffer('sound');
 
-      const track1 = otic.addAudio('track1', sound);
+      const track1 = a2d.addAudio('track1', sound);
 
       track1.volume = 50;
 
@@ -116,9 +116,9 @@ describe('Managing Audio Clips', () => {
     muskOx.onComplete.add(() => {
       const sound = muskOx.fetch.audioBuffer('sound');
 
-      otic.addAudio('track1', sound);
+      a2d.addAudio('track1', sound);
 
-      chai.expect(otic.clips.length).to.equal(1);
+      chai.expect(a2d.clips.length).to.equal(1);
 
       done();
     });
@@ -132,9 +132,9 @@ describe('Managing Audio Clips', () => {
     muskOx.onComplete.add(() => {
       const sound = muskOx.fetch.audioBuffer('sound');
 
-      otic.addAudio('track1', sound);
+      a2d.addAudio('track1', sound);
 
-      const retrieved = otic.getAudio('track1');
+      const retrieved = a2d.getAudio('track1');
 
       chai.expect(retrieved.name).to.equal('track1');
 
@@ -150,11 +150,11 @@ describe('Managing Audio Clips', () => {
     muskOx.onComplete.add(() => {
       const sound = muskOx.fetch.audioBuffer('sound');
 
-      otic.addAudio('track1', sound);
+      a2d.addAudio('track1', sound);
 
-      otic.removeAudio('track1');
+      a2d.removeAudio('track1');
 
-      chai.expect(otic.clips.length).to.equal(0);
+      chai.expect(a2d.clips.length).to.equal(0);
 
       done();
     });
@@ -168,12 +168,12 @@ describe('Managing Audio Clips', () => {
     muskOx.onComplete.add(() => {
       const sound = muskOx.fetch.audioBuffer('sound');
 
-      otic.addAudio('track1', sound);
-      otic.addAudio('track2', sound);
+      a2d.addAudio('track1', sound);
+      a2d.addAudio('track2', sound);
 
-      otic.removeAllAudio();
+      a2d.removeAllAudio();
 
-      chai.expect(otic.clips.length).to.equal(0);
+      chai.expect(a2d.clips.length).to.equal(0);
 
       done();
     });
@@ -184,7 +184,48 @@ describe('Managing Audio Clips', () => {
   });
 });
 
-describe('Adding Nodes to ')
+describe('Adding Nodes to Clips', () => {
+  it('should add a biquadFilter node to the clip', done => {
+    muskOx.onComplete.add(() => {
+      const sound = muskOx.fetch.audioBuffer('sound');
+
+      const track1 = a2d.addAudio('track1', sound);
+
+      track1.addNode(a2d.nodes.biquadFilter());
+
+      chai.expect(track1.nodes.biquadFilter instanceof BiquadFilterNode).to.be.true;
+
+      done();
+
+    });
+
+    muskOx.audioBuffer('sound', './assets/123.m4a');
+
+    muskOx.start();
+  });
+
+  it('should add a biquadFilter node and a gain node to the clip', done => {
+    muskOx.onComplete.add(() => {
+      const sound = muskOx.fetch.audioBuffer('sound');
+
+      const track1 = a2d.addAudio('track1', sound);
+
+      track1.addNode(a2d.nodes.biquadFilter());
+      track1.addNode(a2d.nodes.gain());
+
+      chai.expect(track1.nodes.biquadFilter instanceof BiquadFilterNode).to.be.true;
+
+      chai.expect(track1.nodes.gain instanceof GainNode).to.be.true;
+
+      done();
+
+    });
+
+    muskOx.audioBuffer('sound', './assets/123.m4a');
+
+    muskOx.start();
+  });
+});
 
 describe('Playing Audio Clips', () => {
   it('should update the state to PLAYING when the clip is playing', done => {
@@ -193,7 +234,7 @@ describe('Playing Audio Clips', () => {
 
       const markers = [{ name: 'test', start: 0, duration: 500 }];
 
-      const track1 = otic.addAudio('track1', sound, { markers });
+      const track1 = a2d.addAudio('track1', sound, { markers });
 
       track1.play('test');
 
@@ -214,7 +255,7 @@ describe('Playing Audio Clips', () => {
 
       const markers = [{ name: 'test', start: 0, duration: 500 }];
 
-      const track1 = otic.addAudio('track1', sound, { markers });
+      const track1 = a2d.addAudio('track1', sound, { markers });
 
       track1.play('test');
 
@@ -224,7 +265,7 @@ describe('Playing Audio Clips', () => {
         done();
       }, 1000);
 
-      chai.expect(otic.clips.length).to.equal(1);
+      chai.expect(a2d.clips.length).to.equal(1);
 
     });
 
@@ -239,7 +280,7 @@ describe('Playing Audio Clips', () => {
 
   //     const markers = [{ name: 'test', start: 1500, duration: 1500 }];
 
-  //     const track1 = otic.addAudio('track1', sound, { markers });
+  //     const track1 = a2d.addAudio('track1', sound, { markers });
 
   //     track1.play('test');
 
@@ -250,7 +291,7 @@ describe('Playing Audio Clips', () => {
   //       done();
   //     }, 1000);
 
-  //     chai.expect(otic.clips.length).to.equal(1);
+  //     chai.expect(a2d.clips.length).to.equal(1);
 
   //   });
 
@@ -267,7 +308,7 @@ describe('Pausing/Stopping Audio Clips', () => {
 
       const markers = [{ name: 'test', start: 0, duration: 500 }];
 
-      const track1 = otic.addAudio('track1', sound, { markers });
+      const track1 = a2d.addAudio('track1', sound, { markers });
 
       track1.play('test');
       track1.pause();
@@ -287,7 +328,7 @@ describe('Pausing/Stopping Audio Clips', () => {
     muskOx.onComplete.add(() => {
       const sound = muskOx.fetch.audioBuffer('sound');
 
-      const track1 = otic.addAudio('track1', sound);
+      const track1 = a2d.addAudio('track1', sound);
 
       track1.play();
       track1.mute();
@@ -312,7 +353,7 @@ describe('Pausing/Stopping Audio Clips', () => {
     muskOx.onComplete.add(() => {
       const sound = muskOx.fetch.audioBuffer('sound');
 
-      const track1 = otic.addAudio('track1', sound);
+      const track1 = a2d.addAudio('track1', sound);
 
       track1.play();
       track1.mute();
@@ -341,7 +382,7 @@ describe('Muting and Unmuting Clips', () => {
     muskOx.onComplete.add(() => {
       const sound = muskOx.fetch.audioBuffer('sound');
 
-      const track1 = otic.addAudio('track1', sound);
+      const track1 = a2d.addAudio('track1', sound);
 
       track1.play();
 
@@ -363,7 +404,7 @@ describe('Muting and Unmuting Clips', () => {
     muskOx.onComplete.add(() => {
       const sound = muskOx.fetch.audioBuffer('sound');
 
-      const track1 = otic.addAudio('track1', sound);
+      const track1 = a2d.addAudio('track1', sound);
 
       track1.play();
 
@@ -391,7 +432,7 @@ describe('Muting and Unmuting Clips', () => {
     muskOx.onComplete.add(() => {
       const sound = muskOx.fetch.audioBuffer('sound');
 
-      const track1 = otic.addAudio('track1', sound);
+      const track1 = a2d.addAudio('track1', sound);
 
       track1.play();
       track1.volume = 34;
@@ -403,7 +444,7 @@ describe('Muting and Unmuting Clips', () => {
           track1.unmute();
 
           chai.expect(track1._gain.gain.value).to.be.greaterThan(0.34);
-          
+
           chai.expect(track1._gain.gain.value).to.be.lessThan(0.341);
 
           track1.mute();

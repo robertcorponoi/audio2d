@@ -8,12 +8,12 @@
 
 <div align="center">
 
-  [![NPM version](https://img.shields.io/npm/v/a2d.svg?style=flat)](https://www.npmjs.com/package/a2d)
-  [![Known Vulnerabilities](https://snyk.io/test/github/robertcorponoi/a2d/badge.svg)](https://snyk.io/test/github/robertcorponoi/a2d)
-  ![npm](https://img.shields.io/npm/dt/a2d)
-  [![NPM downloads](https://img.shields.io/npm/dm/a2d.svg?style=flat)](https://www.npmjs.com/package/a2d)
-  <a href="https://badge.fury.io/js/a2d"><img src="https://img.shields.io/github/issues/robertcorponoi/a2d.svg" alt="issues" height="18"></a>
-  <a href="https://badge.fury.io/js/a2d"><img src="https://img.shields.io/github/license/robertcorponoi/a2d.svg" alt="license" height="18"></a>
+  [![NPM version](https://img.shields.io/npm/v/audio2d.svg?style=flat)](https://www.npmjs.com/package/audio2d)
+  [![Known Vulnerabilities](https://snyk.io/test/github/robertcorponoi/audio2d/badge.svg)](https://snyk.io/test/github/robertcorponoi/audio2d)
+  ![npm](https://img.shields.io/npm/dt/audio2d)
+  [![NPM downloads](https://img.shields.io/npm/dm/a2d.svg?style=flat)](https://www.npmjs.com/package/audio2d)
+  <a href="https://badge.fury.io/js/audio2d"><img src="https://img.shields.io/github/issues/robertcorponoi/audio2d.svg" alt="issues" height="18"></a>
+  <a href="https://badge.fury.io/js/audio2d"><img src="https://img.shields.io/github/license/robertcorponoi/audio2d.svg" alt="license" height="18"></a>
   [![Gitter](https://badges.gitter.im/gitterHQ/gitter.svg)](https://gitter.im/robertcorponoi)
 
 </div>
@@ -40,16 +40,16 @@ and then initialize it like so:
 
 ```js
 // Browser
-import Audio2D from './node_modules/a2d/a2d.js';
+import Audio2D from './node_modules/audio2d/a2d.js';
 
 // Webpack
-import Audio2D from 'a2d';
+import Audio2D from 'audio2d';
 ```
 
 or you can use it as a script from unpkg like so:
 
 ```html
-<script type="module" src="https://unpkg.com/a2d@latest/a2d.js"></script>
+<script type="module" src="https://unpkg.com/audio2d@latest/audio2d.js"></script>
 ```
 
 ## **A Note About Preloading**
@@ -348,3 +348,17 @@ sfx.play();
 sfx.mute();
 sfx.unmute();
 ```
+
+## **Tests**
+
+The tests for Audio2D are browser based so to run them you will need to use:
+
+```bash
+$ npm run test
+```
+
+and then you'll have to navigate to `localhost:8888/test/index.html` to see all of the tests run.
+
+## **License**
+
+MIT

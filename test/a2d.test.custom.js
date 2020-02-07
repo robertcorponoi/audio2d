@@ -1,23 +1,16 @@
 'use strict'
 
-import Otic from '../otic.js';
-import MuskOx from 'musk-ox/muskox';
+import Audio2D from '../audio2d.js';
+import MuskOx from '../node_modules/musk-ox/muskox.js';
 
-const otic = new Otic();
-const muskOx = new MuskOx({ audioContext: otic._ctx });
+const a2d = new Audio2D();
+const muskOx = new MuskOx({ audioContext: a2d._ctx });
 
 muskOx.onComplete.add(() => {
   const sound = muskOx.fetch.audioBuffer('sna');
 
-  const track1 = otic.addAudio('sna', sound);
-
-  const bf = otic.nodes.biquadFilter();
-  const bf2 = otic.nodes.biquadFilter();
-  const bf3 = otic.nodes.biquadFilter();
-
-  track1.addNode(bf);
-
-  track1.loop = true;
+  const track1 = a2d.addAudio('sna', sound);
+  
   track1.play();
 });
 

@@ -1,3 +1,9 @@
+0.1.0 / 2020-02-07
+==================
+* [MISC] Removed audioworklet-polyfill and deltaframe dependencies.
+* [MISC] Expanded tests.
+* [MISC] Published initial version to npm.
+
 0.0.8 / 2020-02-06
 ==================
 * [FEATURE] Added a `trigger` option to audio clips that allows you to specify the id or classname of a dom element that when clicked will trigger the clip to play.

@@ -149,6 +149,8 @@ export default class AudioClip {
    */
   private _nodes: any = {};
 
+  private _effects: any = {};
+
   /**
    * Indicates whether this audio clip is played on a loop or not.
    * 
@@ -287,30 +289,14 @@ export default class AudioClip {
   play(marker?: string) {
     const offset: number = this._timePausedAt;
 
-    this._gain.gain.value = this._volume / 100;
-
     this._source = this._options.ctx.createBufferSource();
 
     this._source.buffer = this._audio;
-
-    if (this._nodesref.length > 0) {
-      const firstNode: Node = this._nodesref[0];
-      const latestNode: Node = this._nodesref[this._nodesref.length - 1]
-
-      this._source.connect(latestNode.instance);
-
-      firstNode.instance.connect(this._gain);
-    } else {
-      this._source.connect(this._gain);
-    }
-
-    this._source.onended = () => {
-      this._state = AudioClipState.STOPPED;
-
-      this._source.onended = null;
-    };
-
     this._source.loop = this.loop;
+
+    this._connectNodes();
+
+    this._oncomplete();
 
     if (marker) {
       const clipMarker: (Marker | undefined) = this._options.markers?.find((m: Marker) => m.name === marker);
@@ -319,7 +305,7 @@ export default class AudioClip {
 
       this._source.start(0, clipMarker.start / 1000, clipMarker.duration ? clipMarker.duration / 1000 : undefined);
 
-      if (clipMarker.name === 'a2d-pause') this._options.markers = this._options.markers?.filter((marker: Marker) => marker.name !== 'a2d-pause');
+      this._resetPause(clipMarker);
     } else {
       this._source.start();
     }
@@ -440,26 +426,45 @@ export default class AudioClip {
     el.addEventListener('click', () => this.play());
   }
 
-  // async bt() {
-  //   this._options.ctx.audioWorklet.addModule('https://raw.githubusercontent.com/GoogleChromeLabs/web-audio-samples/master/audio-worklet/basic/bit-crusher/bit-crusher-processor.js')
-  //   .then((blah: any) => {
-  //     console.log('hi');
-  //       console.log(blah);
-  //       const bitCrusher =
-  //         new AudioWorkletNode(this._options.ctx, 'bit-crusher-processor');
-  //       const paramBitDepth = bitCrusher.parameters.get('bitDepth');
-  //       const paramReduction = bitCrusher.parameters.get('frequencyReduction');
-    
-  //       this._source = this._options.ctx.createBufferSource();
-    
-  //       this._source.buffer = this._audio;
-    
-  //       this._source.connect(bitCrusher).connect(this._options.ctx.destination);
-    
-  //       paramReduction!.setValueAtTime(0.01, 0);
-  //       paramBitDepth!.setValueAtTime(1, 0);
-    
-  //       this._source.start();
-  //     })
-  // }
+  /**
+   * Connects the nodes that have been added through `addNode`.
+   * 
+   * @private
+   */
+  private _connectNodes() {
+    if (this._nodesref.length > 0) {
+      const firstNode: Node = this._nodesref[0];
+      const latestNode: Node = this._nodesref[this._nodesref.length - 1]
+
+      this._source.connect(latestNode.instance);
+
+      firstNode.instance.connect(this._gain);
+    } else {
+      this._source.connect(this._gain);
+    }
+  }
+
+  /**
+   * Specify what happens when a clip is finished playing.
+   * 
+   * @private
+   */
+  private _oncomplete() {
+    this._source.onended = () => {
+      this._state = AudioClipState.STOPPED;
+
+      this._source.onended = null;
+    };
+  }
+
+  /**
+   * Resets any markers set by `pause`.
+   * 
+   * @private
+   * 
+   * @param {Marker} clipMarker The marker to check if should be removed.
+   */
+  private _resetPause(clipMarker: Marker) {
+    if (clipMarker.name === 'a2d-pause') this._options.markers = this._options.markers?.filter((marker: Marker) => marker.name !== 'a2d-pause');
+  }
 }

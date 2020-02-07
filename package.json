@@ -53,8 +53,6 @@
     "typescript": "^3.7.5"
   },
   "dependencies": {
-    "@babel/runtime": "^7.8.4",
-    "audioworklet-polyfill": "^1.1.2",
-    "hypergiant": "^3.0.4"
+    "@babel/runtime": "^7.8.4"
   }
 }
