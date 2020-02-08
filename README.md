@@ -30,17 +30,17 @@
 
 ## **Installation**
 
-To install a2d, you can use:
+To install audio2d, you can use:
 
 ```bash
-$ npm install a2d
+$ npm install audio2d
 ```
 
 and then initialize it like so:
 
 ```js
 // Browser
-import Audio2D from './node_modules/audio2d/a2d.js';
+import Audio2D from './node_modules/audio2d/audio2d.js';
 
 // Webpack
 import Audio2D from 'audio2d';

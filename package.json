@@ -1,6 +1,6 @@
 {
   "name": "audio2d",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Easy to use API to add the power of web audio to your game.",
   "main": "index.js",
   "module": "audio2d.js",

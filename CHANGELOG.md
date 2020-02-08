@@ -1,3 +1,7 @@
+0.1.1 / 2020-02-07
+==================
+* [MISC] Fixed type in README in the installation section.
+
 0.1.0 / 2020-02-07
 ==================
 * [MISC] Removed audioworklet-polyfill and deltaframe dependencies.
