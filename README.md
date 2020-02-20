@@ -11,7 +11,7 @@
   [![NPM version](https://img.shields.io/npm/v/audio2d.svg?style=flat)](https://www.npmjs.com/package/audio2d)
   [![Known Vulnerabilities](https://snyk.io/test/github/robertcorponoi/audio2d/badge.svg)](https://snyk.io/test/github/robertcorponoi/audio2d)
   ![npm](https://img.shields.io/npm/dt/audio2d)
-  [![NPM downloads](https://img.shields.io/npm/dm/a2d.svg?style=flat)](https://www.npmjs.com/package/audio2d)
+  [![NPM downloads](https://img.shields.io/npm/dm/audio2d.svg?style=flat)](https://www.npmjs.com/package/audio2d)
   <a href="https://badge.fury.io/js/audio2d"><img src="https://img.shields.io/github/issues/robertcorponoi/audio2d.svg" alt="issues" height="18"></a>
   <a href="https://badge.fury.io/js/audio2d"><img src="https://img.shields.io/github/license/robertcorponoi/audio2d.svg" alt="license" height="18"></a>
   [![Gitter](https://badges.gitter.im/gitterHQ/gitter.svg)](https://gitter.im/robertcorponoi)
@@ -318,6 +318,27 @@ sfx.play();
 
 setTimeout(() => {
   sfx.stop();
+}, 1000);
+```
+
+### **seek**
+
+Seeks to a specific time in the clip.
+
+| param  | type   | description                            | default |
+|--------|--------|----------------------------------------|---------|
+| time   | number | The time, in milliseconds, to seek to. |         |
+
+**example:**
+
+```js
+const sfx = a2d.addAudio('sfx', sfxBuffer);
+
+sfx.play();
+
+setTimeout(() => {
+  // After a second, we skip to the 12 second mark.
+  sfx.seek(12000);
 }, 1000);
 ```
 

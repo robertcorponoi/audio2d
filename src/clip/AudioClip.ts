@@ -305,7 +305,7 @@ export default class AudioClip {
 
       this._source.start(0, clipMarker.start / 1000, clipMarker.duration ? clipMarker.duration / 1000 : undefined);
 
-      this._resetPause(clipMarker);
+      this._resetA2DMarkers(clipMarker);
     } else {
       this._source.start();
     }
@@ -380,6 +380,28 @@ export default class AudioClip {
     this._timeStartedAt = 0;
 
     this._state = AudioClipState.STOPPED;
+  }
+
+  /**
+   * Seeks to a specific time in the clip.
+   * 
+   * @param {number} time The time, in milliseconds, to seek to.
+   */
+  seek(time: number) {
+    if (!time) return;
+
+    if (time > this.duration * 1000) {
+      console.warn('The time to seek to is greater than the duration of the clip.');
+      return;
+    }
+
+    if (this._state === AudioClipState.PLAYING) {
+      this.stop();
+    }
+
+    this._options.markers?.push({ name: 'a2d-seek', start: time });
+
+    this.play('a2d-seek');
   }
 
   /**
@@ -458,13 +480,13 @@ export default class AudioClip {
   }
 
   /**
-   * Resets any markers set by `pause`.
+   * Resets any markers set internally.
    * 
    * @private
    * 
    * @param {Marker} clipMarker The marker to check if should be removed.
    */
-  private _resetPause(clipMarker: Marker) {
-    if (clipMarker.name === 'a2d-pause') this._options.markers = this._options.markers?.filter((marker: Marker) => marker.name !== 'a2d-pause');
+  private _resetA2DMarkers(clipMarker: Marker) {
+    if (clipMarker.name.includes('a2d')) this._options.markers = this._options.markers?.filter((marker: Marker) => !marker.name.includes('a2d'));
   }
 }

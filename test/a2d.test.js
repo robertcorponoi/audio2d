@@ -349,7 +349,7 @@ describe('Pausing/Stopping Audio Clips', () => {
     muskOx.start();
   });
 
-  it('should set the state to PLAYING when the clip has been resumed from a paused state', (done) => {
+  it('should set the state to PLAYING when the clip has been resumed from a paused state', done => {
     muskOx.onComplete.add(() => {
       const sound = muskOx.fetch.audioBuffer('sound');
 
@@ -372,6 +372,32 @@ describe('Pausing/Stopping Audio Clips', () => {
     });
 
     muskOx.audioBuffer('sound', './assets/123.m4a');
+
+    muskOx.start();
+  }).timeout(3000);
+});
+
+describe('Seeking', () => {
+  it('should seek to 14000ms after playing for 1000ms', done => {
+    muskOx.onComplete.add(() => {
+      const sound = muskOx.fetch.audioBuffer('sound');
+
+      const track1 = a2d.addAudio('track1', sound);
+
+      track1.play();
+      track1.mute();
+
+      setTimeout(() => {
+        track1.seek(14000);
+
+        chai.expect(track1._options.ctx.currentTime + 12000).to.be.greaterThan(12000);
+        chai.expect(track1._options.ctx.currentTime + 12000).to.be.lessThan(12200);
+
+        done();
+      }, 1000);
+    });
+
+    muskOx.audioBuffer('sound', './assets/sna.m4a');
 
     muskOx.start();
   }).timeout(3000);

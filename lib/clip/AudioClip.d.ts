@@ -258,6 +258,12 @@ export default class AudioClip {
      */
     stop(): void;
     /**
+     * Seeks to a specific time in the clip.
+     *
+     * @param {number} time The time, in milliseconds, to seek to.
+     */
+    seek(time: number): void;
+    /**
      * Mutes this clip.
      *
      * @example
@@ -299,11 +305,11 @@ export default class AudioClip {
      */
     private _oncomplete;
     /**
-     * Resets any markers set by `pause`.
+     * Resets any markers set internally.
      *
      * @private
      *
      * @param {Marker} clipMarker The marker to check if should be removed.
      */
-    private _resetPause;
+    private _resetA2DMarkers;
 }

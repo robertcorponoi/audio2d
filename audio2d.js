@@ -369,7 +369,7 @@ function () {
 
         this._source.start(0, clipMarker.start / 1000, clipMarker.duration ? clipMarker.duration / 1000 : undefined);
 
-        this._resetPause(clipMarker);
+        this._resetA2DMarkers(clipMarker);
       } else {
         this._source.start();
       }
@@ -447,6 +447,34 @@ function () {
       this._timePausedAt = 0;
       this._timeStartedAt = 0;
       this._state = AudioClipState.STOPPED;
+    }
+    /**
+     * Seeks to a specific time in the clip.
+     * 
+     * @param {number} time The time, in milliseconds, to seek to.
+     */
+
+  }, {
+    key: "seek",
+    value: function seek(time) {
+      var _this$_options$marker3;
+
+      if (!time) return;
+
+      if (time > this.duration * 1000) {
+        console.warn('The time to seek to is greater than the duration of the clip.');
+        return;
+      }
+
+      if (this._state === AudioClipState.PLAYING) {
+        this.stop();
+      }
+
+      (_this$_options$marker3 = this._options.markers) === null || _this$_options$marker3 === void 0 ? void 0 : _this$_options$marker3.push({
+        name: 'a2d-seek',
+        start: time
+      });
+      this.play('a2d-seek');
     }
     /**
      * Mutes this clip.
@@ -536,7 +564,7 @@ function () {
       };
     }
     /**
-     * Resets any markers set by `pause`.
+     * Resets any markers set internally.
      * 
      * @private
      * 
@@ -544,12 +572,12 @@ function () {
      */
 
   }, {
-    key: "_resetPause",
-    value: function _resetPause(clipMarker) {
-      var _this$_options$marker3;
+    key: "_resetA2DMarkers",
+    value: function _resetA2DMarkers(clipMarker) {
+      var _this$_options$marker4;
 
-      if (clipMarker.name === 'a2d-pause') this._options.markers = (_this$_options$marker3 = this._options.markers) === null || _this$_options$marker3 === void 0 ? void 0 : _this$_options$marker3.filter(function (marker) {
-        return marker.name !== 'a2d-pause';
+      if (clipMarker.name.includes('a2d')) this._options.markers = (_this$_options$marker4 = this._options.markers) === null || _this$_options$marker4 === void 0 ? void 0 : _this$_options$marker4.filter(function (marker) {
+        return !marker.name.includes('a2d');
       });
     }
   }, {
