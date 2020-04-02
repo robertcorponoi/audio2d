@@ -1,3 +1,6 @@
+## 0.2.1/ 2020-04-02
+- [MISC] Updated out-of-date dependencies to their latest versions.
+
 ## 0.2.0/ 2020-02-19
 - [FEATURE] Added ability to seek through an audio clip.
 - [DOCS] Updated README with seek method.

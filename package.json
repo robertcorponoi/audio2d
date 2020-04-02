@@ -1,6 +1,6 @@
 {
   "name": "audio2d",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Easy to use API to add the power of web audio to your game.",
   "main": "index.js",
   "module": "audio2d.js",
@@ -38,23 +38,23 @@
   "typings": "lib/index.ts",
   "devDependencies": {
     "@babel/cli": "^7.8.4",
-    "@babel/core": "^7.8.4",
+    "@babel/core": "^7.9.0",
     "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/plugin-proposal-numeric-separator": "^7.8.3",
-    "@babel/plugin-proposal-object-rest-spread": "^7.8.3",
-    "@babel/plugin-transform-runtime": "^7.8.3",
-    "@babel/preset-env": "^7.8.4",
-    "@babel/preset-typescript": "^7.8.3",
+    "@babel/plugin-proposal-object-rest-spread": "^7.9.0",
+    "@babel/plugin-transform-runtime": "^7.9.0",
+    "@babel/preset-env": "^7.9.0",
+    "@babel/preset-typescript": "^7.9.0",
     "@rollup/plugin-commonjs": "^11.0.2",
     "@rollup/plugin-node-resolve": "^7.1.1",
     "musk-ox": "^5.0.1",
-    "rollup": "^1.31.1",
-    "rollup-plugin-babel": "^4.3.3",
+    "rollup": "^2.3.2",
+    "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "typescript": "^3.7.5"
+    "typescript": "^3.8.3"
   },
   "dependencies": {
-    "@babel/runtime": "^7.8.4"
+    "@babel/runtime": "^7.9.2"
   }
 }

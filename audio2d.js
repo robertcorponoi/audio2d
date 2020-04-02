@@ -44,9 +44,7 @@ var defineProperty = _defineProperty;
 /**
  * Provides an interface for adding web audio nodes.
  */
-var Nodes =
-/*#__PURE__*/
-function () {
+var Nodes = /*#__PURE__*/function () {
   /**
    * A reference to the AudioContext.
    * 
@@ -116,9 +114,7 @@ var AudioClipState;
  * a playable clip with extra properties.
  */
 
-var AudioClip =
-/*#__PURE__*/
-function () {
+var AudioClip = /*#__PURE__*/function () {
   /**
    * The name of the audio clip.
    * 
@@ -672,9 +668,7 @@ function () {
 /**
  * Audio2D is a web audio helper for adding sound/music to your JavaScript games.
  */
-var Audio2D =
-/*#__PURE__*/
-function () {
+var Audio2D = /*#__PURE__*/function () {
   function Audio2D() {
     classCallCheck(this, Audio2D);
 
