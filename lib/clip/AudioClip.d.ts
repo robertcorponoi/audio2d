@@ -1,10 +1,10 @@
-import AudioClipOptions from '../options/AudioClipOptions';
-import Node from '../interfaces/Node';
+import { AudioClipOptions } from '../options/AudioClipOptions';
+import { Node } from '../interfaces/Node';
 /**
  * An audio clip represents a piece of audio, which is either an audio html element or an audio boffer, as
  * a playable clip with extra properties.
  */
-export default class AudioClip {
+export declare class AudioClip {
     /**
      * The name of the audio clip.
      *

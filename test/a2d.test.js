@@ -1,6 +1,6 @@
 'use strict'
 
-import Audio2D from '../audio2d.js';
+import { Audio2D } from '../audio2d.js';
 import MuskOx from '../node_modules/musk-ox/muskox.js';
 
 let a2d;
@@ -9,479 +9,479 @@ let muskOx;
 mocha.setup({ globals: '__VUE_DEVTOOLS_TOAST__' });
 
 beforeEach(() => {
-  a2d = new Audio2D();
-  muskOx = new MuskOx({ audioContext: a2d._ctx });
+    a2d = new Audio2D();
+    muskOx = new MuskOx({ audioContext: a2d._ctx });
 });
 
 afterEach(() => {
-  a2d = null;
-  muskOx = null;
+    a2d = null;
+    muskOx = null;
 });
 
 describe('Getting and Setting Properties', () => {
-  it('should get the name of the clip', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+    it('should get the name of the clip', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-      const track1 = a2d.addAudio('track1', sound);
+            const track1 = a2d.addAudio('track1', sound);
 
-      chai.expect(track1.name).to.equal('track1');
+            chai.expect(track1.name).to.equal('track1');
 
-      done();
+            done();
+        });
+
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
+
+        muskOx.start();
     });
 
-    muskOx.audioBuffer('sound', './assets/123.m4a');
+    it('should get the initial state of the clip', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-    muskOx.start();
-  });
+            const track1 = a2d.addAudio('track1', sound);
 
-  it('should get the initial state of the clip', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+            chai.expect(track1.state).to.equal('STOPPED');
 
-      const track1 = a2d.addAudio('track1', sound);
+            done();
+        });
 
-      chai.expect(track1.state).to.equal('STOPPED');
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
 
-      done();
+        muskOx.start();
     });
 
-    muskOx.audioBuffer('sound', './assets/123.m4a');
+    it('should get the number of times a clip was played', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-    muskOx.start();
-  });
+            const track1 = a2d.addAudio('track1', sound);
 
-  it('should get the number of times a clip was played', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+            track1.play();
+            track1.mute();
 
-      const track1 = a2d.addAudio('track1', sound);
+            setTimeout(() => {
+                track1.play();
 
-      track1.play();
-      track1.mute();
+                chai.expect(track1.timesPlayed).to.equal(2);
 
-      setTimeout(() => {
-        track1.play();
+                done();
+            }, 3000);
+        })
 
-        chai.expect(track1.timesPlayed).to.equal(2);
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
 
-        done();
-      }, 3000);
-    })
+        muskOx.start();
+    }).timeout(50000);
 
-    muskOx.audioBuffer('sound', './assets/123.m4a');
+    it('should get the duration of the clip', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-    muskOx.start();
-  }).timeout(50000);
+            const track1 = a2d.addAudio('track1', sound);
 
-  it('should get the duration of the clip', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+            chai.expect(track1.duration).to.equal(5.7585625);
 
-      const track1 = a2d.addAudio('track1', sound);
+            done();
+        });
 
-      chai.expect(track1.duration).to.equal(5.7585625);
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
 
-      done();
+        muskOx.start();
     });
 
-    muskOx.audioBuffer('sound', './assets/123.m4a');
+    it('should change the playback volume', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-    muskOx.start();
-  });
+            const track1 = a2d.addAudio('track1', sound);
 
-  it('should change the playback volume', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+            track1.volume = 50;
 
-      const track1 = a2d.addAudio('track1', sound);
+            chai.expect(track1._gain.gain.value).to.equal(0.5);
 
-      track1.volume = 50;
+            track1.mute();
 
-      chai.expect(track1._gain.gain.value).to.equal(0.5);
+            done();
+        });
 
-      track1.mute();
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
 
-      done();
+        muskOx.start();
     });
-
-    muskOx.audioBuffer('sound', './assets/123.m4a');
-
-    muskOx.start();
-  });
 });
 
 describe('Managing Audio Clips', () => {
-  it('should add an audio clip to the collection of clips', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+    it('should add an audio clip to the collection of clips', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-      a2d.addAudio('track1', sound);
+            a2d.addAudio('track1', sound);
 
-      chai.expect(a2d.clips.length).to.equal(1);
+            chai.expect(a2d.clips.length).to.equal(1);
 
-      done();
+            done();
+        });
+
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
+
+        muskOx.start();
     });
 
-    muskOx.audioBuffer('sound', './assets/123.m4a');
+    it('should get an added audio clip from the collection of clips', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-    muskOx.start();
-  });
+            a2d.addAudio('track1', sound);
 
-  it('should get an added audio clip from the collection of clips', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+            const retrieved = a2d.getAudio('track1');
 
-      a2d.addAudio('track1', sound);
+            chai.expect(retrieved.name).to.equal('track1');
 
-      const retrieved = a2d.getAudio('track1');
+            done();
+        });
 
-      chai.expect(retrieved.name).to.equal('track1');
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
 
-      done();
+        muskOx.start();
     });
 
-    muskOx.audioBuffer('sound', './assets/123.m4a');
+    it('should remove an added audio clip from the collection of clips', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-    muskOx.start();
-  });
+            a2d.addAudio('track1', sound);
 
-  it('should remove an added audio clip from the collection of clips', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+            a2d.removeAudio('track1');
 
-      a2d.addAudio('track1', sound);
+            chai.expect(a2d.clips.length).to.equal(0);
 
-      a2d.removeAudio('track1');
+            done();
+        });
 
-      chai.expect(a2d.clips.length).to.equal(0);
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
 
-      done();
+        muskOx.start();
     });
 
-    muskOx.audioBuffer('sound', './assets/123.m4a');
+    it('should remove all added audio clip from the collection of clips', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-    muskOx.start();
-  });
+            a2d.addAudio('track1', sound);
+            a2d.addAudio('track2', sound);
 
-  it('should remove all added audio clip from the collection of clips', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+            a2d.removeAllAudio();
 
-      a2d.addAudio('track1', sound);
-      a2d.addAudio('track2', sound);
+            chai.expect(a2d.clips.length).to.equal(0);
 
-      a2d.removeAllAudio();
+            done();
+        });
 
-      chai.expect(a2d.clips.length).to.equal(0);
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
 
-      done();
+        muskOx.start();
     });
-
-    muskOx.audioBuffer('sound', './assets/123.m4a');
-
-    muskOx.start();
-  });
 });
 
 describe('Adding Nodes to Clips', () => {
-  it('should add a biquadFilter node to the clip', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+    it('should add a biquadFilter node to the clip', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-      const track1 = a2d.addAudio('track1', sound);
+            const track1 = a2d.addAudio('track1', sound);
 
-      track1.addNode(a2d.nodes.biquadFilter());
+            track1.addNode(a2d.nodes.biquadFilter());
 
-      chai.expect(track1.nodes.biquadFilter instanceof BiquadFilterNode).to.be.true;
+            chai.expect(track1.nodes.biquadFilter instanceof BiquadFilterNode).to.be.true;
 
-      done();
+            done();
 
+        });
+
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
+
+        muskOx.start();
     });
 
-    muskOx.audioBuffer('sound', './assets/123.m4a');
+    it('should add a biquadFilter node and a gain node to the clip', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-    muskOx.start();
-  });
+            const track1 = a2d.addAudio('track1', sound);
 
-  it('should add a biquadFilter node and a gain node to the clip', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+            track1.addNode(a2d.nodes.biquadFilter());
+            track1.addNode(a2d.nodes.gain());
 
-      const track1 = a2d.addAudio('track1', sound);
+            chai.expect(track1.nodes.biquadFilter instanceof BiquadFilterNode).to.be.true;
 
-      track1.addNode(a2d.nodes.biquadFilter());
-      track1.addNode(a2d.nodes.gain());
+            chai.expect(track1.nodes.gain instanceof GainNode).to.be.true;
 
-      chai.expect(track1.nodes.biquadFilter instanceof BiquadFilterNode).to.be.true;
+            done();
 
-      chai.expect(track1.nodes.gain instanceof GainNode).to.be.true;
+        });
 
-      done();
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
 
+        muskOx.start();
     });
-
-    muskOx.audioBuffer('sound', './assets/123.m4a');
-
-    muskOx.start();
-  });
 });
 
 describe('Playing Audio Clips', () => {
-  it('should update the state to PLAYING when the clip is playing', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+    it('should update the state to PLAYING when the clip is playing', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-      const markers = [{ name: 'test', start: 0, duration: 500 }];
+            const markers = [{ name: 'test', start: 0, duration: 500 }];
 
-      const track1 = a2d.addAudio('track1', sound, { markers });
+            const track1 = a2d.addAudio('track1', sound, { markers });
 
-      track1.play('test');
+            track1.play('test');
 
-      chai.expect(track1.state).to.equal('PLAYING');
+            chai.expect(track1.state).to.equal('PLAYING');
 
-      done();
+            done();
 
+        });
+
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
+
+        muskOx.start();
     });
 
-    muskOx.audioBuffer('sound', './assets/123.m4a');
+    it('should update the state to STOPPED when the clip is finished playing', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-    muskOx.start();
-  });
+            const markers = [{ name: 'test', start: 0, duration: 500 }];
 
-  it('should update the state to STOPPED when the clip is finished playing', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+            const track1 = a2d.addAudio('track1', sound, { markers });
 
-      const markers = [{ name: 'test', start: 0, duration: 500 }];
+            track1.play('test');
 
-      const track1 = a2d.addAudio('track1', sound, { markers });
+            setTimeout(() => {
+                chai.expect(track1.state).to.equal('STOPPED');
 
-      track1.play('test');
+                done();
+            }, 1000);
 
-      setTimeout(() => {
-        chai.expect(track1.state).to.equal('STOPPED');
+            chai.expect(a2d.clips.length).to.equal(1);
 
-        done();
-      }, 1000);
+        });
 
-      chai.expect(a2d.clips.length).to.equal(1);
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
 
+        muskOx.start();
     });
 
-    muskOx.audioBuffer('sound', './assets/123.m4a');
+    // it('should play from a marker', done => {
+    //   muskOx.onComplete.add(() => {
+    //     const sound = muskOx.fetch.audioBuffer('sound');
 
-    muskOx.start();
-  });
+    //     const markers = [{ name: 'test', start: 1500, duration: 1500 }];
 
-  // it('should play from a marker', done => {
-  //   muskOx.onComplete.add(() => {
-  //     const sound = muskOx.fetch.audioBuffer('sound');
+    //     const track1 = a2d.addAudio('track1', sound, { markers });
 
-  //     const markers = [{ name: 'test', start: 1500, duration: 1500 }];
+    //     track1.play('test');
 
-  //     const track1 = a2d.addAudio('track1', sound, { markers });
+    //     setTimeout(() => {
+    //       console.log(track1.currentTime);
+    //       chai.expect(track1.state).to.equal('STOPPED');
 
-  //     track1.play('test');
+    //       done();
+    //     }, 1000);
 
-  //     setTimeout(() => {
-  //       console.log(track1.currentTime);
-  //       chai.expect(track1.state).to.equal('STOPPED');
+    //     chai.expect(a2d.clips.length).to.equal(1);
 
-  //       done();
-  //     }, 1000);
+    //   });
 
-  //     chai.expect(a2d.clips.length).to.equal(1);
+    //   muskOx.audioBuffer('sound', 'test/assets/123.m4a');
 
-  //   });
-
-  //   muskOx.audioBuffer('sound', './assets/123.m4a');
-
-  //   muskOx.start();
-  // });
+    //   muskOx.start();
+    // });
 });
 
 describe('Pausing/Stopping Audio Clips', () => {
-  it('should set the state to PAUSED when the clip is paused', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+    it('should set the state to PAUSED when the clip is paused', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-      const markers = [{ name: 'test', start: 0, duration: 500 }];
+            const markers = [{ name: 'test', start: 0, duration: 500 }];
 
-      const track1 = a2d.addAudio('track1', sound, { markers });
+            const track1 = a2d.addAudio('track1', sound, { markers });
 
-      track1.play('test');
-      track1.pause();
+            track1.play('test');
+            track1.pause();
 
-      chai.expect(track1.state).to.equal('PAUSED');
+            chai.expect(track1.state).to.equal('PAUSED');
 
-      done();
+            done();
 
+        });
+
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
+
+        muskOx.start();
     });
 
-    muskOx.audioBuffer('sound', './assets/123.m4a');
+    it('should set the time that the clip was paused at', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-    muskOx.start();
-  });
+            const track1 = a2d.addAudio('track1', sound);
 
-  it('should set the time that the clip was paused at', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+            track1.play();
+            track1.mute();
 
-      const track1 = a2d.addAudio('track1', sound);
+            setTimeout(() => {
+                track1.pause();
 
-      track1.play();
-      track1.mute();
+                chai.expect(track1._timePausedAt).to.be.greaterThan(0.9);
 
-      setTimeout(() => {
-        track1.pause();
+                chai.expect(track1._timePausedAt).to.be.lessThan(1.1);
 
-        chai.expect(track1._timePausedAt).to.be.greaterThan(0.9);
+                done();
+            }, 1000);
+        });
 
-        chai.expect(track1._timePausedAt).to.be.lessThan(1.1);
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
 
-        done();
-      }, 1000);
+        muskOx.start();
     });
 
-    muskOx.audioBuffer('sound', './assets/123.m4a');
+    it('should set the state to PLAYING when the clip has been resumed from a paused state', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-    muskOx.start();
-  });
+            const track1 = a2d.addAudio('track1', sound);
 
-  it('should set the state to PLAYING when the clip has been resumed from a paused state', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+            track1.play();
+            track1.mute();
 
-      const track1 = a2d.addAudio('track1', sound);
+            setTimeout(() => {
+                track1.pause();
 
-      track1.play();
-      track1.mute();
+                setTimeout(() => {
+                    track1.resume();
 
-      setTimeout(() => {
-        track1.pause();
+                    chai.expect(track1._state).to.equal('PLAYING');
 
-        setTimeout(() => {
-          track1.resume();
+                    done();
+                }, 500);
+            }, 2000);
+        });
 
-          chai.expect(track1._state).to.equal('PLAYING');
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
 
-          done();
-        }, 500);
-      }, 2000);
-    });
-
-    muskOx.audioBuffer('sound', './assets/123.m4a');
-
-    muskOx.start();
-  }).timeout(3000);
+        muskOx.start();
+    }).timeout(3000);
 });
 
 describe('Seeking', () => {
-  it('should seek to 14000ms after playing for 1000ms', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+    it('should seek to 14000ms after playing for 1000ms', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-      const track1 = a2d.addAudio('track1', sound);
+            const track1 = a2d.addAudio('track1', sound);
 
-      track1.play();
-      track1.mute();
+            track1.play();
+            track1.mute();
 
-      setTimeout(() => {
-        track1.seek(14000);
+            setTimeout(() => {
+                track1.seek(14000);
 
-        chai.expect(track1._options.ctx.currentTime + 12000).to.be.greaterThan(12000);
-        chai.expect(track1._options.ctx.currentTime + 12000).to.be.lessThan(12200);
+                chai.expect(track1._options.ctx.currentTime + 12000).to.be.greaterThan(12000);
+                chai.expect(track1._options.ctx.currentTime + 12000).to.be.lessThan(12200);
 
-        done();
-      }, 1000);
-    });
+                done();
+            }, 1000);
+        });
 
-    muskOx.audioBuffer('sound', './assets/sna.m4a');
+        muskOx.audioBuffer('sound', 'test/assets/sna.m4a');
 
-    muskOx.start();
-  }).timeout(3000);
+        muskOx.start();
+    }).timeout(3000);
 });
 
 describe('Muting and Unmuting Clips', () => {
-  it('should mute a clip', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+    it('should mute a clip', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-      const track1 = a2d.addAudio('track1', sound);
+            const track1 = a2d.addAudio('track1', sound);
 
-      track1.play();
+            track1.play();
 
-      setTimeout(() => {
-        track1.mute();
+            setTimeout(() => {
+                track1.mute();
 
-        chai.expect(track1._gain.gain.value).to.equal(0);
+                chai.expect(track1._gain.gain.value).to.equal(0);
 
-        done();
-      }, 500);
+                done();
+            }, 500);
+        });
+
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
+
+        muskOx.start();
     });
 
-    muskOx.audioBuffer('sound', './assets/123.m4a');
+    it('should unmute a clip after being muted', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-    muskOx.start();
-  });
+            const track1 = a2d.addAudio('track1', sound);
 
-  it('should unmute a clip after being muted', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+            track1.play();
 
-      const track1 = a2d.addAudio('track1', sound);
+            setTimeout(() => {
+                track1.mute();
 
-      track1.play();
+                setTimeout(() => {
+                    track1.unmute();
 
-      setTimeout(() => {
-        track1.mute();
+                    chai.expect(track1._gain.gain.value).to.equal(1);
 
-        setTimeout(() => {
-          track1.unmute();
+                    track1.mute();
 
-          chai.expect(track1._gain.gain.value).to.equal(1);
+                    done();
+                }, 500);
+            }, 500);
+        });
 
-          track1.mute();
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
 
-          done();
-        }, 500);
-      }, 500);
+        muskOx.start();
     });
 
-    muskOx.audioBuffer('sound', './assets/123.m4a');
+    it('should unmute a clip with the same volume level as before it was muted', done => {
+        muskOx.onComplete.add(() => {
+            const sound = muskOx.fetch.audioBuffer('sound');
 
-    muskOx.start();
-  });
+            const track1 = a2d.addAudio('track1', sound);
 
-  it('should unmute a clip with the same volume level as before it was muted', done => {
-    muskOx.onComplete.add(() => {
-      const sound = muskOx.fetch.audioBuffer('sound');
+            track1.play();
+            track1.volume = 34;
 
-      const track1 = a2d.addAudio('track1', sound);
+            setTimeout(() => {
+                track1.mute();
 
-      track1.play();
-      track1.volume = 34;
+                setTimeout(() => {
+                    track1.unmute();
 
-      setTimeout(() => {
-        track1.mute();
+                    chai.expect(track1._gain.gain.value).to.be.greaterThan(0.34);
 
-        setTimeout(() => {
-          track1.unmute();
+                    chai.expect(track1._gain.gain.value).to.be.lessThan(0.341);
 
-          chai.expect(track1._gain.gain.value).to.be.greaterThan(0.34);
+                    track1.mute();
 
-          chai.expect(track1._gain.gain.value).to.be.lessThan(0.341);
+                    done();
+                }, 500);
+            }, 500);
+        });
 
-          track1.mute();
+        muskOx.audioBuffer('sound', 'test/assets/123.m4a');
 
-          done();
-        }, 500);
-      }, 500);
+        muskOx.start();
     });
-
-    muskOx.audioBuffer('sound', './assets/123.m4a');
-
-    muskOx.start();
-  });
 });

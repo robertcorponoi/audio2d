@@ -1,7 +1,7 @@
 /**
  * Defines the structure of the object that is used to define an audio clips markers.
  */
-export default interface Marker {
+export interface Marker {
     /**
      * The name of this marker.
      */

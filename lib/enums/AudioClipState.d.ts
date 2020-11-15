@@ -1,5 +1,5 @@
 /**
- * Describes the different states available for an audio clip.
+ * The states that an audio clip can be in.
  */
 export declare enum AudioClipState {
     STOPPED = "STOPPED",

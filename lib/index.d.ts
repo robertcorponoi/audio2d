@@ -1,10 +1,10 @@
-import Nodes from './nodes/Nodes';
-import AudioClip from './clip/AudioClip';
-import AudioClipOptions from './options/AudioClipOptions';
+import { Nodes } from './nodes/Nodes';
+import { AudioClip } from './clip/AudioClip';
+import { AudioClipOptions } from './options/AudioClipOptions';
 /**
  * Audio2D is a web audio helper for adding sound/music to your JavaScript games.
  */
-export default class Audio2D {
+export declare class Audio2D {
     /**
      * A reference to the audio context.
      *

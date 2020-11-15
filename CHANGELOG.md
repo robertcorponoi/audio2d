@@ -1,3 +1,8 @@
+## 1.0.0 / 2020-11-15
+- [FEATURE] Made Audio2D a named export.
+- [DOCS] Updated usage documentation to account for named export and updated table of contents.
+- [MISC] Updated out-of-date dependencies to their latest versions.
+
 ## 0.2.2 / 2020-04-17
 - [MISC] Updated out-of-date dependencies to their latest versions which also fixed all possible fixed security vulnerabilities.
 

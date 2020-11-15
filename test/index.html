@@ -2,31 +2,30 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <title>Audio2D Tests</title>
+    <title>Audio2D Tests</title>
 
-  <link rel="stylesheet" href="https://unpkg.com/mocha/mocha.css">
+    <link rel="stylesheet" href="https://unpkg.com/mocha/mocha.css">
 </head>
 
 <body>
-  <canvas id="myCanvas" width="400" height="350"></canvas>
+    <canvas id="myCanvas" width="400" height="350"></canvas>
 
-  <div id="mocha"></div>
+    <div id="mocha"></div>
 
-  <script src="https://unpkg.com/chai/chai.js"></script>
-  <script src="https://unpkg.com/mocha/mocha.js"></script>
+    <script src="https://unpkg.com/chai/chai.js"></script>
+    <script src="https://unpkg.com/mocha/mocha.js"></script>
 
-  <script>mocha.setup('bdd')</script>
+    <script>mocha.setup('bdd')</script>
 
-  <script type="module" src="./a2d.test.js"></script>
-  <!-- <script type="module" src="./a2d.test.custom.js"></script> -->
+    <script type="module" src="test/a2d.test.js"></script>
 
-  <script type="module">
-    mocha.checkLeaks();
-    mocha.run();
-  </script>
+    <script type="module">
+        mocha.checkLeaks();
+        mocha.run();
+    </script>
 </body>
 
 </html>

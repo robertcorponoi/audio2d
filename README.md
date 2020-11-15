@@ -1,6 +1,6 @@
-<!-- <p align="center">
-  <img width="250" height="250" src="">
-</p> -->
+<p align="center">
+  <img width="250" height="250" src="https://raw.githubusercontent.com/robertcorponoi/graphics/master/audio2d/logo/logo.png" alt="Logo">
+</p>
 
 <h1 align="center">Audio2D</h1>
 
@@ -22,11 +22,19 @@
 
 - [Installation](#installation)
 - [A Note About Preloading](#a-note-about-preloading)
-- [Base API](#base-api)
-  - [Methods](#base-api-methods)
+- [Base API](#api)
+    - [addAudio](#addaudio)
+    - [getAudio](#getaudio)
+    - [removeAudio](#removeaudio)
+    - [removeAllAudio](#removeAllAudio)
 - [AudioClip API](#audio-clip-api)
-  - [Properties](#audio-clip-properties)
-  - [Methods](#audio-clip-methods)
+    - [properties](#audio-clip-properties)
+    - [addNode](#addnode)
+    - [play](#play)
+    - [pause](#pause)
+    - [stop](#stop)
+    - [mute](#mute)
+    - [unmute](#unmute)
 
 ## **Installation**
 
@@ -38,11 +46,15 @@ $ npm install audio2d
 
 and then initialize it like so:
 
-```js
-// Browser
-import Audio2D from './node_modules/audio2d/audio2d.js';
+**Current Version**
 
-// Webpack
+```js
+import { Audio2D } from 'audio2d';
+```
+
+**Pre 1.0.0**
+
+```js
 import Audio2D from 'audio2d';
 ```
 

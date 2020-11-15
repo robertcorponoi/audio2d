@@ -98,7 +98,7 @@ var Nodes = /*#__PURE__*/function () {
 }();
 
 /**
- * Describes the different states available for an audio clip.
+ * The states that an audio clip can be in.
  */
 
 var AudioClipState;
@@ -141,8 +141,6 @@ var AudioClip = /*#__PURE__*/function () {
 
   /**
    * A reference to the options for this audio clip.
-   * 
-   * @private
    * 
    * @property {AudioClipOptions}
    */
@@ -250,7 +248,9 @@ var AudioClip = /*#__PURE__*/function () {
    * @param {AudioBuffer} audio The AudioBuffer that contains the audio of the clip.
    * @param {AudioClipOptions} [options] The options passed to this audio clip.
    */
-  function AudioClip(name, audio, options) {
+  function AudioClip(name, audio) {
+    var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
     classCallCheck(this, AudioClip);
 
     defineProperty(this, "_name", void 0);
@@ -259,7 +259,7 @@ var AudioClip = /*#__PURE__*/function () {
 
     defineProperty(this, "_source", void 0);
 
-    defineProperty(this, "_options", void 0);
+    defineProperty(this, "options", void 0);
 
     defineProperty(this, "_gain", void 0);
 
@@ -283,20 +283,18 @@ var AudioClip = /*#__PURE__*/function () {
 
     defineProperty(this, "_nodes", {});
 
-    defineProperty(this, "_effects", {});
-
     defineProperty(this, "loop", false);
 
     this._name = name;
     this._audio = audio;
     this._duration = audio.duration;
-    this._options = options;
-    this._gain = this._options.ctx.createGain();
+    this.options = options;
+    this._gain = this.options.ctx.createGain();
 
-    this._gain.connect(this._options.ctx.destination);
+    this._gain.connect(this.options.ctx.destination);
 
-    if (this._options.trigger) this._setupTrigger();
-    if (!this._options.markers) this._options.markers = [];
+    if (this.options.trigger) this._setupTrigger();
+    if (!this.options.markers) this.options.markers = [];
   }
   /**
    * Gets the name of the audio clip.
@@ -347,7 +345,7 @@ var AudioClip = /*#__PURE__*/function () {
     key: "play",
     value: function play(marker) {
       var offset = this._timePausedAt;
-      this._source = this._options.ctx.createBufferSource();
+      this._source = this.options.ctx.createBufferSource();
       this._source.buffer = this._audio;
       this._source.loop = this.loop;
 
@@ -356,9 +354,9 @@ var AudioClip = /*#__PURE__*/function () {
       this._oncomplete();
 
       if (marker) {
-        var _this$_options$marker;
+        var _this$options$markers;
 
-        var clipMarker = (_this$_options$marker = this._options.markers) === null || _this$_options$marker === void 0 ? void 0 : _this$_options$marker.find(function (m) {
+        var clipMarker = (_this$options$markers = this.options.markers) === null || _this$options$markers === void 0 ? void 0 : _this$options$markers.find(function (m) {
           return m.name === marker;
         });
         if (!clipMarker) return;
@@ -370,7 +368,7 @@ var AudioClip = /*#__PURE__*/function () {
         this._source.start();
       }
 
-      this._timeStartedAt = this._options.ctx.currentTime - offset;
+      this._timeStartedAt = this.options.ctx.currentTime - offset;
       this._timePausedAt = 0;
       this._state = AudioClipState.PLAYING;
       this._timesPlayed++;
@@ -391,12 +389,12 @@ var AudioClip = /*#__PURE__*/function () {
   }, {
     key: "pause",
     value: function pause() {
-      var _this$_options$marker2;
+      var _this$options$markers2;
 
-      var elapsed = this._options.ctx.currentTime - this._timeStartedAt;
+      var elapsed = this.options.ctx.currentTime - this._timeStartedAt;
       this.stop();
       this._timePausedAt = elapsed;
-      (_this$_options$marker2 = this._options.markers) === null || _this$_options$marker2 === void 0 ? void 0 : _this$_options$marker2.push({
+      (_this$options$markers2 = this.options.markers) === null || _this$options$markers2 === void 0 ? void 0 : _this$options$markers2.push({
         name: 'a2d-pause',
         start: this._timePausedAt * 1000
       });
@@ -439,7 +437,7 @@ var AudioClip = /*#__PURE__*/function () {
     value: function stop() {
       this._source.disconnect();
 
-      this._source = this._options.ctx.createBufferSource();
+      this._source = this.options.ctx.createBufferSource();
       this._timePausedAt = 0;
       this._timeStartedAt = 0;
       this._state = AudioClipState.STOPPED;
@@ -453,7 +451,7 @@ var AudioClip = /*#__PURE__*/function () {
   }, {
     key: "seek",
     value: function seek(time) {
-      var _this$_options$marker3;
+      var _this$options$markers3;
 
       if (!time) return;
 
@@ -462,11 +460,8 @@ var AudioClip = /*#__PURE__*/function () {
         return;
       }
 
-      if (this._state === AudioClipState.PLAYING) {
-        this.stop();
-      }
-
-      (_this$_options$marker3 = this._options.markers) === null || _this$_options$marker3 === void 0 ? void 0 : _this$_options$marker3.push({
+      if (this._state === AudioClipState.PLAYING) this.stop();
+      (_this$options$markers3 = this.options.markers) === null || _this$options$markers3 === void 0 ? void 0 : _this$options$markers3.push({
         name: 'a2d-seek',
         start: time
       });
@@ -517,7 +512,7 @@ var AudioClip = /*#__PURE__*/function () {
     value: function _setupTrigger() {
       var _this = this;
 
-      var el = document.querySelector(this._options.trigger);
+      var el = document.querySelector(this.options.trigger);
       if (!el) return;
       el.addEventListener('click', function () {
         return _this.play();
@@ -570,11 +565,13 @@ var AudioClip = /*#__PURE__*/function () {
   }, {
     key: "_resetA2DMarkers",
     value: function _resetA2DMarkers(clipMarker) {
-      var _this$_options$marker4;
+      if (clipMarker.name.includes('a2d')) {
+        var _this$options$markers4;
 
-      if (clipMarker.name.includes('a2d')) this._options.markers = (_this$_options$marker4 = this._options.markers) === null || _this$_options$marker4 === void 0 ? void 0 : _this$_options$marker4.filter(function (marker) {
-        return !marker.name.includes('a2d');
-      });
+        this.options.markers = (_this$options$markers4 = this.options.markers) === null || _this$options$markers4 === void 0 ? void 0 : _this$options$markers4.filter(function (marker) {
+          !marker.name.includes('a2d');
+        });
+      }
     }
   }, {
     key: "name",
@@ -613,7 +610,7 @@ var AudioClip = /*#__PURE__*/function () {
     key: "currentTime",
     get: function get() {
       if (this._state === AudioClipState.PAUSED) return this._timePausedAt;
-      if (this._state === AudioClipState.PLAYING) return this._options.ctx.currentTime - this._timeStartedAt;
+      if (this._state === AudioClipState.PLAYING) return this.options.ctx.currentTime - this._timeStartedAt;
       return 0;
     }
     /**
@@ -647,7 +644,7 @@ var AudioClip = /*#__PURE__*/function () {
     set: function set(vol) {
       this._volume = vol;
 
-      this._gain.gain.setValueAtTime(this._volume / 100, this._options.ctx.currentTime);
+      this._gain.gain.setValueAtTime(this._volume / 100, this.options.ctx.currentTime);
     }
     /**
      * Gets the created nodes.
@@ -801,4 +798,4 @@ var Audio2D = /*#__PURE__*/function () {
   return Audio2D;
 }();
 
-export default Audio2D;
+export { Audio2D };

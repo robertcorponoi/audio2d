@@ -8,15 +8,15 @@ import resolve from '@rollup/plugin-node-resolve';
 const extensions = ['.js', '.jsx', '.ts', '.tsx'];
 
 export default {
-  input: './src/index.ts',
-  external: [],
-  plugins: [
-    resolve({ extensions }),
-    commonjs({ include: 'node_modules/**'}),
-    babel({ extensions, include: ['src/**/*'], runtimeHelpers: true }),
-  ],
-  output: [{
-    file: pkg.module,
-    format: 'es',
-  }]
+    input: './src/index.ts',
+    external: [],
+    plugins: [
+        resolve({ extensions }),
+        commonjs({ include: 'node_modules/**' }),
+        babel({ extensions, include: ['src/**/*'], runtimeHelpers: true }),
+    ],
+    output: [{
+        file: pkg.module,
+        format: 'es',
+    }]
 };

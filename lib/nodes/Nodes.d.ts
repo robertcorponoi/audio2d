@@ -1,8 +1,8 @@
-import Node from '../interfaces/Node';
+import { Node } from '../interfaces/Node';
 /**
  * Provides an interface for adding web audio nodes.
  */
-export default class Nodes {
+export declare class Nodes {
     /**
      * A reference to the AudioContext.
      *
