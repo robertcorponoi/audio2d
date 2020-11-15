@@ -1,3 +1,6 @@
+## 1.0.1 / 2020-11-15
+- [HOTFIX] Fixed incorrect value for typings in package.json.
+
 ## 1.0.0 / 2020-11-15
 - [FEATURE] Made Audio2D a named export.
 - [DOCS] Updated usage documentation to account for named export and updated table of contents.

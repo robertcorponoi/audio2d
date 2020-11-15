@@ -1,6 +1,6 @@
 {
   "name": "audio2d",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Easy to use API to add the power of web audio to your game.",
   "main": "index.js",
   "module": "audio2d.js",
@@ -36,7 +36,7 @@
   ],
   "author": "Robert Corponoi",
   "license": "MIT",
-  "typings": "lib/index.ts",
+  "typings": "lib/index.d.ts",
   "devDependencies": {
     "@babel/cli": "^7.12.1",
     "@babel/core": "^7.12.3",
