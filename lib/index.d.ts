@@ -1,6 +1,6 @@
-import { Nodes } from './nodes/Nodes';
-import { AudioClip } from './clip/AudioClip';
-import { AudioClipOptions } from './options/AudioClipOptions';
+import { Nodes } from './Nodes';
+import { AudioClip } from './audio_clip';
+import { AudioClipOptions } from './interfaces/AudioClipOptions';
 /**
  * Audio2D is a web audio helper for adding sound/music to your JavaScript games.
  */

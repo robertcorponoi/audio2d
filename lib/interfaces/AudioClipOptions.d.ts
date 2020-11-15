@@ -1,4 +1,4 @@
-import { Marker } from '../interfaces/Marker';
+import { Marker } from './Marker';
 /**
  * Defines the structure of the options that can be passed when creating a new AudioClip.
  */

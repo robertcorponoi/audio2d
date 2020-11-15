@@ -1,5 +1,5 @@
-import { AudioClipOptions } from '../options/AudioClipOptions';
-import { Node } from '../interfaces/Node';
+import { AudioClipOptions } from './interfaces/AudioClipOptions';
+import { Node } from './interfaces/Node';
 /**
  * An audio clip represents a piece of audio, which is either an audio html element or an audio boffer, as
  * a playable clip with extra properties.
@@ -127,7 +127,6 @@ export declare class AudioClip {
      * @property {*}
      */
     private _nodes;
-    private _effects;
     /**
      * Indicates whether this audio clip is played on a loop or not.
      *

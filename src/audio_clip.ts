@@ -42,9 +42,11 @@ export class AudioClip {
     /**
      * A reference to the options for this audio clip.
      * 
+     * @private
+     * 
      * @property {AudioClipOptions}
      */
-    options: AudioClipOptions;
+    private _options: AudioClipOptions;
 
     /**
      * A reference to the gain node for this clip.
@@ -161,17 +163,17 @@ export class AudioClip {
      * @param {AudioBuffer} audio The AudioBuffer that contains the audio of the clip.
      * @param {AudioClipOptions} [options] The options passed to this audio clip.
      */
-    constructor(name: string, audio: AudioBuffer, options: AudioClipOptions = {}) {
+    constructor(name: string, audio: AudioBuffer, options: AudioClipOptions) {
         this._name = name;
         this._audio = audio;
         this._duration = audio.duration;
-        this.options = options;
+        this._options = options;
 
-        this._gain = this.options.ctx.createGain();
-        this._gain.connect(this.options.ctx.destination);
+        this._gain = this._options.ctx.createGain();
+        this._gain.connect(this._options.ctx.destination);
 
-        if (this.options.trigger) this._setupTrigger();
-        if (!this.options.markers) this.options.markers = [];
+        if (this._options.trigger) this._setupTrigger();
+        if (!this._options.markers) this._options.markers = [];
     }
 
     /**
@@ -202,7 +204,7 @@ export class AudioClip {
      */
     get currentTime(): number {
         if (this._state === AudioClipState.PAUSED) return this._timePausedAt;
-        if (this._state === AudioClipState.PLAYING) return this.options.ctx.currentTime - this._timeStartedAt;
+        if (this._state === AudioClipState.PLAYING) return this._options.ctx.currentTime - this._timeStartedAt;
 
         return 0;
     }
@@ -228,7 +230,7 @@ export class AudioClip {
      */
     set volume(vol: number) {
         this._volume = vol;
-        this._gain.gain.setValueAtTime(this._volume / 100, this.options.ctx.currentTime);
+        this._gain.gain.setValueAtTime(this._volume / 100, this._options.ctx.currentTime);
     }
 
     /**
@@ -276,7 +278,7 @@ export class AudioClip {
     play(marker?: string) {
         const offset: number = this._timePausedAt;
 
-        this._source = this.options.ctx.createBufferSource();
+        this._source = this._options.ctx.createBufferSource();
         this._source.buffer = this._audio;
         this._source.loop = this.loop;
 
@@ -284,7 +286,7 @@ export class AudioClip {
         this._oncomplete();
 
         if (marker) {
-            const clipMarker: (Marker | undefined) = this.options.markers?.find((m: Marker) => m.name === marker);
+            const clipMarker: (Marker | undefined) = this._options.markers?.find((m: Marker) => m.name === marker);
             if (!clipMarker) return;
 
             this._source.start(0, clipMarker.start / 1000, clipMarker.duration ? clipMarker.duration / 1000 : undefined);
@@ -293,7 +295,7 @@ export class AudioClip {
             this._source.start();
         }
 
-        this._timeStartedAt = this.options.ctx.currentTime - offset;
+        this._timeStartedAt = this._options.ctx.currentTime - offset;
         this._timePausedAt = 0;
 
         this._state = AudioClipState.PLAYING;
@@ -313,12 +315,12 @@ export class AudioClip {
      * }, 1000);
      */
     pause() {
-        const elapsed: number = this.options.ctx.currentTime - this._timeStartedAt;
+        const elapsed: number = this._options.ctx.currentTime - this._timeStartedAt;
 
         this.stop();
 
         this._timePausedAt = elapsed
-        this.options.markers?.push({ name: 'a2d-pause', start: this._timePausedAt * 1000 });
+        this._options.markers?.push({ name: 'a2d-pause', start: this._timePausedAt * 1000 });
 
         this._state = AudioClipState.PAUSED;
     }
@@ -354,7 +356,7 @@ export class AudioClip {
      */
     stop() {
         this._source.disconnect();
-        this._source = this.options.ctx.createBufferSource();
+        this._source = this._options.ctx.createBufferSource();
 
         this._timePausedAt = 0;
         this._timeStartedAt = 0;
@@ -377,7 +379,7 @@ export class AudioClip {
 
         if (this._state === AudioClipState.PLAYING) this.stop();
 
-        this.options.markers?.push({ name: 'a2d-seek', start: time });
+        this._options.markers?.push({ name: 'a2d-seek', start: time });
         this.play('a2d-seek');
     }
 
@@ -417,7 +419,7 @@ export class AudioClip {
      * @private
      */
     private _setupTrigger() {
-        const el: (HTMLElement | null) = document.querySelector(this.options.trigger!);
+        const el: (HTMLElement | null) = document.querySelector(this._options.trigger!);
         if (!el) return;
 
         el.addEventListener('click', () => this.play());
@@ -462,7 +464,7 @@ export class AudioClip {
      */
     private _resetA2DMarkers(clipMarker: Marker) {
         if (clipMarker.name.includes('a2d')) {
-            this.options.markers = this.options.markers?.filter((marker: Marker) => {
+            this._options.markers = this._options.markers?.filter((marker: Marker) => {
                 !marker.name.includes('a2d');
             });
         }

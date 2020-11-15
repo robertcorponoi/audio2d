@@ -1,4 +1,4 @@
-import { Node } from '../interfaces/Node';
+import { Node } from './interfaces/Node';
 /**
  * Provides an interface for adding web audio nodes.
  */
